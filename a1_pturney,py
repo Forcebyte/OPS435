@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+
+argdate = sys.argv[1]
+argoption = sys.argv[2]
+
+#Test if the date entered is actually a date
+if len(argdate) != 8 or not argdate.isdigit():
+	print("Error: Wrong date entered")
+	exit()
+
+#Split the entered value into YYYY/MM/DD
+argyear = argdate[0:4]
+print ("Year = " + str(argyear))
+
+argmonth = argdate[4:6]
+print ("Month = " + str(argmonth))
+
+argday = argdate[6:8]
+print ("Day = " + str(argday))
+
+#Check to see if valid month or day is entered
+if int(argmonth) > 12:
+	print("Error: Wrong month entered")
+elif int(argday) > 31:
+	print ("Error: Wrong day entered")
+
+def isleapyear(argyear):
+#Check to see if year is a leap year
+	lyear = argyear % 4
+	if lyear == 0:
+		feb_max = 29 # This is a leap year
+	else:
+		feb_max = 28 # This is not a leap year
+	lyear = argyear % 100
+	if lyear == 0:
+		feb_max = 28 # This is not a leap year
+	lyear = argyear % 400
+	if lyear == 0:
+		feb_max = 29 # This is a leap year
+	return(feb_max)
+
+def tomorrow(argdate):
+	#Function returns tomorrow's date with argument argdate given
+	argyear = int(argdate[0:4])
+	argmonth = int(argdate[4:6])
+	argday = int(argdate[6:])
+	#Check to see if leapyear exists, isleapyear returns the num of days in feburary
+	feb_max = isleapyear(argyear)
+	
+	#Resultant will be what day we want to return, which is the next day
+	resultday = argday + 1
+	
+	#MaxMonth is the maximum number of days per month, (#:# = Month:Day)
+	MaxMonth = { 1:31, 2:feb_max, 3:31, 4:30, 5:31, 6:30, 7:31, 8:31, 9:30, 10:31, 11:30, 12:31}
+	
+	#If the day is above the maximum number of days for the month, cycle to the next month as
+	#the first day,
+	
+	if resultday > MaxMonth[argmonth]:
+		varday = resultday % MaxMonth[argmonth]
+		resultmonth = argmonth + 1
+	else:
+		varday = resultday
+		resultmonth = argmonth
+	if resultmonth > 12:
+		varmonth = 1
+		varyear  = argyear + 1
+	else:
+		varmonth = resultmonth
+		varyear = argyear
+	nextdate = str(varyear)+str(varmonth).zfill(2)+str(varday).zfill(2)
+	return nextdate
+
+#def yesterday(argdate):
+
+def dbda(argdate,days):
+	days = round(int(days))
+	if days > 0:
+		tomorrowdate = tomorrow(argdate)
+		while days != 1:
+			print("Days = " + str(days))
+			tomorrowdate = tomorrow(tomorrowdate)
+			print(str(tomorrowdate))
+			days = days - 1
+def usage():
+	return("USAGE...")
+
+
+if __name__ == "__main__":
+	dbda(argdate,argoption)
