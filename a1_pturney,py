@@ -3,138 +3,171 @@
 import os
 import sys
 
-argdate = sys.argv[1]
-argoption = sys.argv[2]
+# Defines usage function to refer to later
+def usage():
+        print ("Usage...")
+        exit()
+
+#If the amount of arguments out of the scope of the function, print usage and exit
+if ((len(sys.argv) >= 5 or len(sys.argv) <= 2)):
+        usage()
+
+#If the --step option is defined, shift argdate and argoption over one
+if sys.argv[1] == "--step":
+        argstep = "True"
+        argdate = sys.argv[2]
+        argoption = sys.argv[3]
+else:
+        argstep = "False"
+        argdate = sys.argv[1]
+        argoption = sys.argv[2]
+
 
 def validdate(argdate):
-	#Test if the date entered is actually a date
-	if len(argdate) != 8 or not argdate.isdigit():
-		print("Error: Wrong date entered")
-		exit()
+        #Test if the date entered is actually a date
+        if len(argdate) != 8 or not argdate.isdigit():
+                print("Error: Wrong date entered")
+                exit()
 
-	#Split the entered value into YYYY/MM/DD
-	argyear = argdate[0:4]
-	print ("Year = " + str(argyear))
+        #Split the entered value into YYYY/MM/DD
+        argyear = argdate[0:4]
+        #print ("Year = " + str(argyear))
 
-	argmonth = argdate[4:6]
-	print ("Month = " + str(argmonth))
+        argmonth = argdate[4:6]
+        #print ("Month = " + str(argmonth))
 
-	argday = argdate[6:8]
-	print ("Day = " + str(argday))
+        argday = argdate[6:8]
+        #print ("Day = " + str(argday))
 
-	#Check to see if valid month or day is entered
-	if int(argmonth) > 12:
-		print("Error: Wrong month entered")
-	elif int(argday) > 31:
-		print ("Error: Wrong day entered")
+        #Check to see if valid month or day is entered
+        if int(argmonth) > 12:
+                print("Error: Wrong month entered")
+                exit()
+        elif int(argday) > 31:
+                print ("Error: Wrong day entered")
+                exit()
 
 def leapyear(argyear):
 #Check to see if year is a leap year
-	lyear = argyear % 4
-	if lyear == 0:
-		feb_max = 29 # This is a leap year
-	else:
-		feb_max = 28 # This is not a leap year
-	lyear = argyear % 100
-	if lyear == 0:
-		feb_max = 28 # This is not a leap year
-	lyear = argyear % 400
-	if lyear == 0:
-		feb_max = 29 # This is a leap year
-	return(feb_max)
+        lyear = argyear % 4
+        if lyear == 0:
+                feb_max = 29 # This is a leap year
+        else:
+                feb_max = 28 # This is not a leap year
+        lyear = argyear % 100
+        if lyear == 0:
+                feb_max = 28 # This is not a leap year
+        lyear = argyear % 400
+        if lyear == 0:
+                feb_max = 29 # This is a leap year
+        return(feb_max)
 
 def tomorrow(argdate):
-	#Function returns tomorrow's date with argument argdate given
-	validdate(argdate)
-	argyear = int(argdate[0:4])
-	argmonth = int(argdate[4:6])
-	argday = int(argdate[6:])
-	#Check to see if leapyear exists, if exists, add days to feburary
-	feb_max = leapyear(argyear)
-	
-	#Resultant will be what day we want to return, which is the next day
-	resultday = argday + 1
-	
-	#MaxMonth is the maximum number of days per month, (#:# = Month:Day)
-	MaxMonth = { 1:31, 2:feb_max, 3:31, 4:30, 5:31, 6:30, 7:31, 8:31, 9:30, 10:31, 11:30, 12:31}
-	
-	#If the day is above the maximum number of days for the month, cycle to the next month as
-	#the first day,
-	
-	if resultday > MaxMonth[argmonth]:
-		varday = resultday % MaxMonth[argmonth]
-		resultmonth = argmonth + 1
-	else:
-		varday = resultday
-		resultmonth = argmonth
-	if resultmonth > 12:
-		varmonth = 1
-		varyear  = argyear + 1
-	else:
-		varmonth = resultmonth
-		varyear = argyear
-	nextdate = str(varyear)+str(varmonth).zfill(2)+str(varday).zfill(2)
-	return nextdate
+        #Function returns tomorrow's date with argument argdate given
+        validdate(argdate)
+        argyear = int(argdate[0:4])
+        argmonth = int(argdate[4:6])
+        argday = int(argdate[6:])
+        #Check to see if leapyear exists, if exists, add days to feburary
+        feb_max = leapyear(argyear)
+
+        #Resultant will be what day we want to return, which is the next day
+        resultday = argday + 1
+
+        #MaxMonth is the maximum number of days per month, (#:# = Month:Day)
+        MaxMonth = { 1:31, 2:feb_max, 3:31, 4:30, 5:31, 6:30, 7:31, 8:31, 9:30, 10:31, 11:30, 12:31}
+
+        #If the day is above the maximum number of days for the month, cycle to the next month as
+        #the first day,
+
+        if resultday > MaxMonth[argmonth]:
+                varday = resultday % MaxMonth[argmonth]
+                resultmonth = argmonth + 1
+        else:
+                varday = resultday
+                resultmonth = argmonth
+        if resultmonth > 12:
+                varmonth = 1
+                varyear  = argyear + 1
+        else:
+                varmonth = resultmonth
+                varyear = argyear
+        nextdate = str(varyear)+str(varmonth).zfill(2)+str(varday).zfill(2)
+        return nextdate
 
 def yesterday(argdate):
-	#Function returns yesterday's date with argument argdate given
-	validdate(argdate)
-	argyear = int(argdate[0:4])
-	argmonth = int(argdate[4:6])
-	argday = int(argdate[6:])
-	#Check to see if leapyear exists, if exists, add days to feburary
-	feb_max = leapyear(argyear)
+        #Function returns yesterday's date with argument argdate given
+        validdate(argdate)
+        argyear = int(argdate[0:4])
+        argmonth = int(argdate[4:6])
+        argday = int(argdate[6:])
+        #Check to see if leapyear exists, if exists, add days to feburary
+        feb_max = leapyear(argyear)
 
-	#Resultant will be what day we want to return, which is the next day
-	resultday = argday - 1
-	
-	#MaxMonth is the maximum number of days per month, (#:# = Month:Day)
-	MaxMonth = { 1:31, 2:feb_max, 3:31, 4:30, 5:31, 6:30, 7:31, 8:31, 9:30, 10:31, 11:30, 12:31}
+        #Resultant will be what day we want to return, which is the next day
+        resultday = argday - 1
 
-	#If the day is above the max number of days for the month, cycle to next month but in reverse
+        #MaxMonth is the maximum number of days per month, (#:# = Month:Day)
+        MaxMonth = { 1:31, 2:feb_max, 3:31, 4:30, 5:31, 6:30, 7:31, 8:31, 9:30, 10:31, 11:30, 12:31}
 
-	if resultday < 1:
-	#Change the day
-		resultmonth = argmonth - 1
-		if resultmonth < 1:
-			varday = 31
-		else
-			changement = MaxMonth[resultmonth]
-			varday = changement
-	else:
-		varday = resultday
-		resultmonth = argmonth
-	if resultmonth < 1:
-	#Change the month
-		varmonth = 12
-		varyear  = argyear - 1
-	else:
-		varmonth = resultmonth
-		varyear = argyear
-	nextdate = str(varyear)+str(varmonth).zfill(2)+str(varday).zfill(2)
-	return nextdate
+        #If the day is above the max number of days for the month, cycle to next month but in reverse
+
+        if resultday < 1:
+        #Change the day
+                resultmonth = argmonth - 1
+                if resultmonth < 1:
+                        varday = 31
+                else:
+                        changement = MaxMonth[resultmonth]
+                        varday = changement
+        else:
+                varday = resultday
+                resultmonth = argmonth
+        if resultmonth < 1:
+        #Change the month
+                varmonth = 12
+                varyear  = argyear - 1
+        else:
+                varmonth = resultmonth
+                varyear = argyear
+        nextdate = str(varyear)+str(varmonth).zfill(2)+str(varday).zfill(2)
+        return nextdate
 
 
 def dbda(argdate,days):
-	days = round(int(days))
-	if days > 0:
-		tomorrowdate = tomorrow(argdate)
-		while days != 1:
-			print("Days = " + str(days))
-			tomorrowdate = tomorrow(tomorrowdate)
-			print(str(tomorrowdate))
-			days = days - 1
-	elif days < 0:
-		tomorrowdate = yesterday(argdate)
-		#while days !=
-def usage():
-	return("USAGE...")
+        days = round(int(days))
+        if days > 0:
+                if argstep == "True":
+                        print(tomorrow(argdate))
+                tomorrowdate = tomorrow(argdate)
+                while days != 1:
+                        #print("Days = " + str(days))
+                        tomorrowdate = tomorrow(tomorrowdate)
+                        if argstep == "True":
+                                print(str(tomorrowdate))
+                        days = days - 1
+                if argstep == "False":
+                        print(str(tomorrowdate))
+        elif days < 0:
+                if argstep == "True":
+                        print (yesterday(argdate))
+                yesterdaydate = yesterday(argdate)
+                while days != -1:
+                        #print ("Days = " + str(days))
+                        yesterdaydate = yesterday(yesterdaydate)
+                        if argstep == "True":
+                                print(str(yesterdaydate))
+                        days = days + 1
+                if argstep == "False":
+                        print(str(yesterdaydate))
+        else:
+                days = 0
+                return argdate
 
-
-#if __name__ == "__main__":
-#	dbda(argdate,argoption)
+if __name__ == "__main__":
+        dbda(argdate,argoption)
 
 #This is used to test yesterday function, remove when finished
-if __name__ == "__main__":
-	yesterday(argdate)
-	print(argdate)
+#if __name__ == "__main__":
+#       yesterday(argdate)
+#       print(argdate)
