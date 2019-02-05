@@ -5,3 +5,5 @@ Answers for the CDOT OPS435 CDOT course - https://wiki.cdot.senecacollege.ca/wik
 - [Lab 2](https://github.com/Forcebyte/OPS435_Answerkey/tree/Lab2 "pturney - Lab 2")
 - [Lab 3](https://github.com/Forcebyte/OPS435_Answerkey/tree/Lab3 "pturney - Lab 3")
 - [Lab 4](https://github.com/Forcebyte/OPS435_Answerkey/tree/Lab4 "pturney - Lab 4")
+- [Practical 1](https://github.com/Forcebyte/OPS435_Answerkey/tree/Practical1 "pturney - Prac1")
+- [Lab 5](https://github.com/Forcebyte/OPS435_Answerkey/tree/Lab5 "pturney - Lab 5")
