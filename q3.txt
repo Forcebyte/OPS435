@@ -1,0 +1,20 @@
+Name: Patrick Turney
+Student Number: 114850167
+
+(a) Name of the function which maps letter grade to value?
+  the name of the function is gpv
+(b) What value the function named in (a) will return for a letter grade of 'D”?
+  1
+(c) Name of the function which calculates and returns grade point average for a given list of grades?
+  the name of the function is gpa
+(d) Which of the following types of object will the function named in (c) take without trigger any
+errors?
+  it can take in the following..
+	A String
+	A list of Strings
+	A set of strings
+	A dictionary of strings with the same value
+	A tuple of strings
+
+ Type of object to consider: integer, string, list of strings, tuple with string items.
+ (Hint: the function may take more than one of the above objects without trigger any errors.)
