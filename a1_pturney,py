@@ -23,8 +23,8 @@ def usage():
 	Prints the usage of the script in a helpful manner
 	"""
 	use = """
-	a1_pturney.py [--step] DATE NUMDAYS   -> str
-    tomorrow() takes a valid date (DATE) and a number of days (NUMDAYS)
+	Usage: a1_rchan.py [--step] YYYYMMDD +/-n
+    Takes a valid date (DATE) and a number of days (NUMDAYS)
     and returns a certain number of days specified...
 
     Positional Arguments:
