@@ -1,0 +1,9 @@
+Mid-Term Test – Decoding
+Name: Patrick Turney
+Student ID: pturney
+
+(a) function argument type: a string
+(b) purpose of the for loop in wc(): it appears that it is for determining a character and letter count
+(c) the type of object 'f' is: a string
+(d) the type of information returned by object 'a' is: the length of variable 'word', which is the  character count
+(e) the type of information returned by object 'd' is: the length of variable 's', which is the  word count
