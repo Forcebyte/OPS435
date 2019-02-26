@@ -52,7 +52,7 @@ def valid_date(argdate):
 	if isinstance(argdate, int):
 		argdate = str(argdate)
 	if len(argdate) != 8 or not argdate.isdigit():
-		print("Error: Wrong date entered")
+		print("Error: wrong date entered")
 		return("False")
 
 	#Split the entered value into YYYY/MM/DD
@@ -67,10 +67,10 @@ def valid_date(argdate):
 
 	#Check to see if valid month or day is entered
 	if int(argmonth) > 12:
-		print("Error: Wrong month entered")
+		print("Error: wrong month entered")
 		return("False")
 	elif int(argday) > 31:
-		print ("Error: Wrong day entered")
+		print ("Error: wrong day entered")
 		return("False")
 	else:
 		return("True")
