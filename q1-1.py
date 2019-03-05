@@ -17,5 +17,5 @@ ccb_child6to17total = (ccb_6to17 * child_6to17)
 #Add the two totals to get your main total
 ccb_total = ccb_childu6total + ccb_child6to17total
 
-#Print the total to the customer
+#Print the total to the customer, using ccb_total
 print('The total Canada Child Benefit for the family is ' + str(ccb_total))
