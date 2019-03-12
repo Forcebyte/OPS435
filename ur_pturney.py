@@ -22,65 +22,92 @@ import os
 import sys
 import time
 
-#def get_login_rec():
+def get_login_rec(login_recs,args):
 	''' docstring for this fucntion
 	get records from the last command
 	filter out the unwanted records
 	add filtered record to list (login_recs)'''
 	#[ put your python code for this function here ]
 	#return login_recs
+	argument = str(args.list)
+	if argument == "user":
+		users = []
+		for item in login_recs:
+			split = item.split(' ', 1)
+			user = split[0]
+			users.append(user)
+		return(users)
+	if argument == "host":
+		#Remove extra whitespaces to get to host
+		for item in login_recs:
+			while '  ' in item:
+				item = item.replace('  ', ' ') 
+			print(item[3])
+
+
+
+
+
  
 def read_login_rec(filelist,args):
 	''' docstring for this function
 	get records from given filelist
 	open and read each file from the filelist
 	filter out the unwanted records
-	add filtered record to list (login_recs)''' 
+	add filtered record to list (login_recs)'''
 	#[ put your python code for this function here ]
 
+	#If we're just given one file, add it to a single array
+	if isinstance(filelist, str):
+			filelist = [filelist]
 	#Takes each record from filelist, adds it to a list
 	unfiltered = []
+
+	#Read the record
 	for fileitem in filelist:
-		file = open(fileitem,"r")
-		unfiltered.append(file.readlines())
-	print(unfiltered)
+			file = open(fileitem,"r")
+			unfiltered.extend(file.read().splitlines())
+
 	#If there is an rhost argument (filter by IP), we filter by IP and add it to filtered
 	# If there isn't just set filtered to be unfiltered for future filtering
 	filtered = []
 	if args.rhost is not None:
-		for item in unfiltered:
-			if str(args.rhost) in item:
-				filtered.append(item)
+			rhost = str(args.rhost)
+			for item in unfiltered:
+					if rhost in item:
+							filtered.append(item)
 	else:
-		filtered = unfiltered
-
+			filtered = unfiltered
 	#If there is a user argument (filter by username), we filter by the username and add it
 	#To the filteredfinal list, if there isn't, just set filtered to be filteredfinal and return
 	filteredfinal = []
 	if args.user is not None:
-		for item in filtered:
-			if str(args.user) in item:
-				filteredfinal.append(item)
-	else:
-		filteredfinal = filtered
-	login_rec = filteredfinal
-	return login_rec
+		username = str(args.user)
+				for item in filtered:
+						if username in item:
+								filteredfinal.append(item)
+		else:
+				filteredfinal = filtered
+		login_rec = filteredfinal
+		return login_rec
 
-#def cal_daily_usage(subject,login_recs):
+
+
+def cal_daily_usage(subject,login_recs):
 	''' docstring for this function
 	generate daily usage report for the given 
 	subject (user or remote host)'''
 	#[ put your python code for this function here ]
 	#return daily_usage
 
-#def cal_weekly_usage(subject,login_recs):
+def cal_weekly_usage(subject,login_recs):
 	''' docstring for this function
 	generate weekly usage report for the given 
 	subject (user or remote host)'''
 	#[ put your python code for this function here ]
 	#return weekly_usage
 
-#def cal_monthly_usage(subject,login_recs):
+def cal_monthly_usage(subject,login_recs):
 	''' docstring for this function
 	generate monthly usage report fro the given
 	subject (user or remote host)'''
@@ -90,7 +117,7 @@ def read_login_rec(filelist,args):
 if __name__ == '__main__':
 	import argparse
 	parser = argparse.ArgumentParser()
-	parser.add_argument("-F", "--file", help="list of files to be processed", required=True)
+	parser.add_argument("-F", "--file", help="list of files to be processed")
 	parser.add_argument("-l", "--list",  help="generate user name or remote host IP from the given files")
 	parser.add_argument("-r", "--rhost",  help="usage report for the given remote host IP")
 	parser.add_argument("-t", "--type",  help="type of report: daily, weekly, and monthly")
@@ -99,7 +126,13 @@ if __name__ == '__main__':
 	#[ code to retrieve command line argument using the argparse module [
 	args = parser.parse_args()
 
-	if args.user is not None:
+	if args is not None:
+		if args.list is not None:
+			args.file = [args.file]
+			login_rec = read_login_rec(args.file,args)
+			userlogin = get_login_rec(login_rec,args)
+			print(userlogin)
+
 		args.file = [args.file]
 		login_rec = read_login_rec(args.file,args)
 		print(login_rec)
