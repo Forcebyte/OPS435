@@ -32,6 +32,8 @@ def get_login_rec(login_recs,args):
 
 	#Grab the Argument given, either user (wants the users logged in) or host (wants the host IP)
 	argument = str(args.list)
+
+	#If the argument is asking for the user list, run through and give users
 	if "user" in argument:
 		users = []
 		#Grab each user for each line
@@ -42,11 +44,14 @@ def get_login_rec(login_recs,args):
 			if user not in users:
 				users.append(user)	
 		return(users)
+	
+	#If the argument is asking for the host list, run through and give hosts
 	if "host" in argument:
 		hosts = []
 		for item in login_recs:
 			split = item.split()
 			host = split[3]
+			#If it is unique, add it to hosts
 			if item not in host:
 				hosts.append(item)
 			print(host)
