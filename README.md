@@ -1,6 +1,9 @@
 # OPS435_Answerkey
 Answers for the CDOT OPS435 CDOT course - https://wiki.cdot.senecacollege.ca/wiki/OPS435_Python
 Note that this was completed in the 2019 Winter Semester, it may be different at a later date.
+
+This is the Second assignment, details about this can be found here: https://scs.senecac.on.ca/~raymond.chan/ops435/a2
+
 ## Contents
 - [Lab 1](https://github.com/Forcebyte/OPS435_Answerkey/tree/Lab1 "pturney - Lab 1")
 - [Lab 2](https://github.com/Forcebyte/OPS435_Answerkey/tree/Lab2 "pturney - Lab 2")
