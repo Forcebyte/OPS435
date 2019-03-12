@@ -29,26 +29,41 @@ def get_login_rec(login_recs,args):
 	add filtered record to list (login_recs)'''
 	#[ put your python code for this function here ]
 	#return login_recs
+
+	#Grab the Argument given, either user (wants the users logged in) or host (wants the host IP)
 	argument = str(args.list)
-	if argument == "user":
+	if "user" in argument:
 		users = []
+		#Grab each user for each line
 		for item in login_recs:
 			split = item.split(' ', 1)
 			user = split[0]
-			users.append(user)
+			#If it is unique, add it to users
+			if user not in users:
+				users.append(user)	
 		return(users)
-	if argument == "host":
-		#Remove extra whitespaces to get to host
+	if "host" in argument:
+		hosts = []
 		for item in login_recs:
-			while '  ' in item:
-				item = item.replace('  ', ' ') 
-			print(item[3])
+			split = item.split()
+			host = split[3]
+			if item not in host:
+				hosts.append(item)
+			print(host)
+		return(hosts)
+	# if "host" in argument:
+	# 	#Remove extra whitespaces, such that each item has a single space between each
+	# 	hosts = []
+	# 	for item in login_recs:
+	# 		while '  ' in item:
+	# 			item = item.replace('  ', ' ')
+	# 			line = 
+	# 		if item not in hosts:
+	# 			hosts.append(item)
+	# 		print(hosts)
+	# 	return(hosts)
 
 
-
-
-
- 
 def read_login_rec(filelist,args):
 	''' docstring for this function
 	get records from given filelist
@@ -126,15 +141,23 @@ if __name__ == '__main__':
 	#[ code to retrieve command line argument using the argparse module [
 	args = parser.parse_args()
 
+	#If there are arguments
 	if args is not None:
-		if args.list is not None:
-			args.file = [args.file]
-			login_rec = read_login_rec(args.file,args)
-			userlogin = get_login_rec(login_rec,args)
-			print(userlogin)
 
-		args.file = [args.file]
-		login_rec = read_login_rec(args.file,args)
-		print(login_rec)
+		#If running with -l (E.g. ./ur.py -l user/host test.txt)
+		if args.list is not None:
+			#Since we are running with -l, the file that we are using is specified in the fourth argument
+			args.file = sys.argv[4]
+			login_rec = read_login_rec(args.file,args)
+			userhost_rec = get_login_rec(login_rec,args)
+
+			#Now that we are done, print the user or host involved by passing through each host/user in the list
+			for user_or_host in userhost_rec:
+				print(user_or_host)
+
+		#If running with -t (E.g. ./ur.py -u rchan -t daily usage_data_file)
+		if args.type is not None:
+			args.file= [args.file]
+			login_rec = read_login_rec(args.file,args)
 	#[ based on the command line option, generate and print
 	#  the requested usage report ]
