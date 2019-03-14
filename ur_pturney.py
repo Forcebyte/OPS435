@@ -22,7 +22,6 @@ import os
 import sys
 import time
 from time import strftime
-#
 
 
 def parse_time(s):
@@ -34,16 +33,16 @@ def parse_time(s):
 				parse_time('005555') -> 3355
 	'''
 	#Split time into hours, minutes, and seconds
-    hour, min, sec = s.split(':')
-    try:
-        hour = int(hour)
-        min = int(min)
-        sec = int(sec)
-    except ValueError:
-        print("INTERNAL CONVERSION ERROR")
-        return 0
-    #60 Seconds > 1 minute, 60 minutes > 1 Hour... Convert all
-    return hour * 60 * 60 + min * 60 + sec
+	hour, min, sec = s.split(':')
+	try:
+		hour = int(hour)
+		min = int(min)
+		sec = int(sec)
+	except ValueError:
+		print("INTERNAL CONVERSION ERROR")
+		return 0
+	#60 Seconds > 1 minute, 60 minutes > 1 Hour... Convert all
+	return hour * 60 * 60 + min * 60 + sec
 
 def get_login_rec(login_recs,args):
 	'''
@@ -159,6 +158,9 @@ def cal_daily_usage(login_recs):
 		dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
 		month = str(split[4])
 		month = dictmonth.get(month)
+		
+		#If the date exists, add the number of seconds along with the old time
+		#If it doesn't add a new entry to timedict
 		dateobject = str(split[7]) + " " + month + " " + str(split[5])
 		dateobjectstring = str(dateobject)
 		if dateobject in timedict:
@@ -206,6 +208,8 @@ def cal_weekly_usage(login_recs):
 		weeknum = str(int(weeknum) + 1)
 
 		dateobjectstring = split[7] + " " + weeknum
+		#If the date exists, add the number of seconds along with the old time
+		#If it doesn't add a new entry to timedict
 		if dateobjectstring in timedict:
 			oldtime = timedict[dateobjectstring]
 			newtime = timedelta + int(oldtime)
@@ -249,8 +253,12 @@ def cal_monthly_usage(login_recs):
 		month = str(split[4])
 		month = dictmonth.get(month)
 
+		#Parse the date object
 		dateobject = str(split[7]) + " " + str(split[4]) + " " + str(split[5])
 		dateobjectstring = split[7] + " " + month
+		
+		#If the date exists, add the number of seconds along with the old time
+		#If it doesn't add a new entry to timedict
 		if dateobjectstring in timedict:
 			oldtime = timedict[dateobjectstring]
 			newtime = timedelta + int(oldtime)
@@ -301,7 +309,7 @@ if __name__ == '__main__':
 			#If asking for a daily report (E.g. ./ur.py -r 10.0.0.1 daily test.txt)
 			if "daily" in timeframe:
 				#Grab the ditionary for daily usage
-				daily_dict 	= cal_daily_usage(subject,login_rec)
+				daily_dict 	= cal_daily_usage(login_rec)
 
 				line = "Daily Usage Report for " + str(subject)
 				eq = len(line)
@@ -319,7 +327,7 @@ if __name__ == '__main__':
 
 			#If asking for a weekly report (E.g. ./ur.py -r 10.0.0.1 weekly test.txt)
 			if "weekly" in timeframe:
-				weekly_dict = cal_weekly_usage(subject,login_rec)
+				weekly_dict = cal_weekly_usage(login_rec)
 
 				line = "Weekly Usage Report for " + str(subject)
 				eq = len(line)
@@ -337,7 +345,7 @@ if __name__ == '__main__':
 
 			#If asking for a monthly report (E.g. ./ur.py -r 10.0.0.1 monthly test.txt)
 			if "monthly" in timeframe:
-				monthly_dict = cal_monthly_usage(subject,login_rec)
+				monthly_dict = cal_monthly_usage(login_rec)
 				print(monthly_dict)
 
 				line = "Monthly Usage Report for " + str(subject)
@@ -356,9 +364,7 @@ if __name__ == '__main__':
 else:
 	parser.print_help()
 class parser(argparse.ArgumentParser):
-    def error(self, message):
-        sys.stderr.write('error: %s\n' % message)
-        self.print_help()
-        sys.exit(2)		
-	#[ based on the command line option, generate and print
-	#  the requested usage report ]
+	def error(self, message):
+		sys.stderr.write('error: %s\n' % message)
+		self.print_help()
+		sys.exit(2)		
