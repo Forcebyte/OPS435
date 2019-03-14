@@ -22,6 +22,7 @@ import os
 import sys
 import time
 
+from time import strftime
 def parse_time(s):
     hour, min, sec = s.split(':')
     try:
@@ -129,13 +130,17 @@ def cal_daily_usage(subject,login_recs):
 		timeendsec = parse_time(str(timeend))
 
 		timedelta = timeendsec - timestartsec
-Daily Usage Report for rchan
-============================
-Date          Usage in Seconds
-2018 02 13        1580
-Total             1580
-		Month = { "Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
-		dateobject = str(split[7]) + " " + str(split[4]) + " / " + str(split[5])
+
+		#String is as follows...
+		#SPLIT[7] = Year YYYY
+		#SPLIT[4] = Month (Apr)
+		#SPLIT[5] = Day DD
+
+		#Since we can't use datetime, convert the month spelling to a number
+		dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
+		month = str(split[4])
+		month = dictmonth.get(month)
+		dateobject = str(split[7]) + " " + month + " " + str(split[5])
 		dateobjectstring = str(dateobject)
 		if dateobject in timedict:
 			oldtime = timedict[dateobjectstring]
@@ -145,7 +150,6 @@ Total             1580
 		else:
 			#minhour = str(split[-1])
 			timedict[dateobjectstring] = str(timedelta)
-
 	return(timedict)
 
 def cal_weekly_usage(subject,login_recs):
@@ -154,6 +158,41 @@ def cal_weekly_usage(subject,login_recs):
 	subject (user or remote host)'''
 	#[ put your python code for this function here ]
 	#return weekly_usage
+	timedict = {}
+	for item in login_recs:
+		#Split item into catagories
+		split = item.split()
+
+		timestart = split[6]
+		timeend = split[12]
+
+		#Parse time gets the number of seconds in a date statement
+		timestartsec = parse_time(str(timestart))
+		timeendsec = parse_time(str(timeend))
+
+		timedelta = timeendsec - timestartsec
+
+		#String is as follows...
+		#SPLIT[7] = Year YYYY
+		#SPLIT[4] = Month (Apr)
+		#SPLIT[5] = Day DD
+
+		
+		dateobject = str(split[7]) + " " + str(split[4]) + " " + str(split[5])
+		striptime = time.strptime(dateobject, "%Y %b %d")
+		weeknum = str(strftime("%U", striptime))
+		weeknum = str(int(weeknum) + 1)
+
+		dateobjectstring = split[7] + " " + weeknum
+		if dateobjectstring in timedict:
+			oldtime = timedict[dateobjectstring]
+			newtime = timedelta + int(oldtime)
+			timedict[dateobjectstring] = newtime
+			#timedict[str(dateobject)] = [timedict[str(dateobject)], str((timedelta + int(timedict.get(str(dateobject)))))]
+		else:
+			#minhour = str(split[-1])
+			timedict[dateobjectstring] = str(timedelta)
+	return(timedict)
 
 def cal_monthly_usage(subject,login_recs):
 	''' docstring for this function
@@ -161,16 +200,46 @@ def cal_monthly_usage(subject,login_recs):
 	subject (user or remote host)'''
 	#[ put your python code for this function here ]
 	#return monthly_usage
+	timedict = {}
+	for item in login_recs:
+		#Split item into catagories
+		split = item.split()
 
-	# #If the argument is asking for the host list, run through and give hosts
-	# if "host" in argument:
-	# 	hosts = []
-	# 	for item in login_recs:
-	# 		split = item.split()
-	# 		host = split[2]
-	# 		if host not in hosts:
-	# 			hosts.append(host)
-	# 	return(hosts)
+		timestart = split[6]
+		timeend = split[12]
+
+		#Parse time gets the number of seconds in a date statement
+		timestartsec = parse_time(str(timestart))
+		timeendsec = parse_time(str(timeend))
+
+		timedelta = timeendsec - timestartsec
+
+		#String is as follows...
+		#SPLIT[7] = Year YYYY
+		#SPLIT[4] = Month (Apr)
+		#SPLIT[5] = Day DD
+
+		#Since we can't use datetime, convert the month spelling to a number
+		dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
+		month = str(split[4])
+		month = dictmonth.get(month)
+
+		dateobject = str(split[7]) + " " + str(split[4]) + " " + str(split[5])
+		striptime = time.strptime(dateobject, "%Y %b %d")
+
+		dateobjectstring = split[7] + " " + monthnum
+		if dateobjectstring in timedict:
+			oldtime = timedict[dateobjectstring]
+			newtime = timedelta + int(oldtime)
+			timedict[dateobjectstring] = newtime
+			#timedict[str(dateobject)] = [timedict[str(dateobject)], str((timedelta + int(timedict.get(str(dateobject)))))]
+		else:
+			#minhour = str(split[-1])
+			timedict[dateobjectstring] = str(timedelta)
+	return(timedict)
+
+
+
 
 	 
 if __name__ == '__main__':
@@ -182,7 +251,7 @@ if __name__ == '__main__':
 	parser.add_argument("-t", "--type",  help="type of report: daily, weekly, and monthly", nargs=2)
 	parser.add_argument("-u", "--user", help="usage report for the given user name")
 	parser.add_argument("-v", "--verbose", help="turn on output verbosity")
-	#[ code to retrieve command line argument using the argparse module [
+	#[ code to retrieve command line argument using the argparse module 
 	args = parser.parse_args()
 
 	#If there are arguments
@@ -209,24 +278,48 @@ if __name__ == '__main__':
 
 			subject = str(sys.argv[2])
 
-			#If its the monthly timeframe, run it with the indicator if its the user or host
+			#If asking for a daily report (E.g. ./ur.py -r 10.0.0.1 daily test.txt)
 			if "daily" in timeframe:
-				monthly_usage 	= cal_daily_usage(subject,login_rec)
-				print(monthly_usage)
+				#Grab the ditionary for daily usage
+				daily_dict 	= cal_daily_usage(subject,login_rec)
 
+				line = "Daily Usage Report for " + str(subject)
+				eq = len(line)
+				
+				print(line)
+				print("=" * eq)
+				print("%-15s %-15s" %("Date","Usage in Seconds"))
+				total = 0
+
+				for key, value in daily_dict.items():
+					#print(str(key) + "	" + str(value))
+					print("%-10s %-10s" %(str(key),"    " + str(value)))
+					total = total + value
+				print("%-10s %-10s" %("Total","    " + str(total)))
+
+			#If asking for a weekly report (E.g. ./ur.py -r 10.0.0.1 weekly test.txt)
 			if "weekly" in timeframe:
-				monthly_usage = cal_monthly_usage(subject,login_rec)
-				usagestring = """
-				Weekly Usage Report for 
-				=====================================
-				Week #        Usage in Seconds
-				"""
+				weekly_dict = cal_weekly_usage(subject,login_rec)
+
+				line = "Weekly Usage Report for " + str(subject)
+				eq = len(line)
+				
+				print(line)
+				print("=" * eq)
+				print("%-15s %-15s" %("Week #","Usage in Seconds"))
+				total = 0
+
+				for key, value in weekly_dict.items():
+					#print(str(key) + "	" + str(value))
+					print("%-10s %-10s" %(str(key),"    " + str(value)))
+					total = total + value
+				print("%-10s %-10s" %("Total","    " + str(total)))
+
+			#If asking for a monthly report (E.g. ./ur.py -r 10.0.0.1 monthly test.txt)
 			if "monthly" in timeframe:
-				monthly_usage = cal_monthly_usage(subject,login_rec)
-				usagestring = """
-				Weekly Usage Report for 
-				=====================================
-				Week #        Usage in Seconds
-				"""
+				monthly_dict = cal_monthly_usage(subject,login_rec)
+				print(monthly_dict)
+
+			
 	#[ based on the command line option, generate and print
 	#  the requested usage report ]
