@@ -22,6 +22,17 @@ import os
 import sys
 import time
 
+def parse_time(s):
+    hour, min, sec = s.split(':')
+    try:
+        hour = int(hour)
+        min = int(min)
+        sec = int(sec)
+    except ValueError:
+        # handle errors here, but this isn't a bad default to ignore errors
+        return 0
+    return hour * 60 * 60 + min * 60 + sec
+
 def get_login_rec(login_recs,args):
 	''' docstring for this fucntion
 	get records from the last command
@@ -99,16 +110,6 @@ def read_login_rec(filelist,args):
 	return login_rec
 
 
-def parse_time(s):
-    hour, min, sec = s.split(':')
-    try:
-        hour = int(hour)
-        min = int(min)
-        sec = int(sec)
-    except ValueError:
-        # handle errors here, but this isn't a bad default to ignore errors
-        return 0
-    return hour * 60 * 60 + min * 60 + sec
 def cal_daily_usage(subject,login_recs):
 	''' docstring for this function
 	generate daily usage report for the given 
@@ -120,17 +121,31 @@ def cal_daily_usage(subject,login_recs):
 		#Split item into catagories
 		split = item.split()
 
-		dateobject = str(split[7]) + " / " + str(split[4]) + " / " + str(split[5])
+		timestart = split[6]
+		timeend = split[12]
+
+		#Parse time takes a 
+		timestartsec = parse_time(str(timestart))
+		timeendsec = parse_time(str(timeend))
+
+		timedelta = timeendsec - timestartsec
+Daily Usage Report for rchan
+============================
+Date          Usage in Seconds
+2018 02 13        1580
+Total             1580
+		Month = { "Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
+		dateobject = str(split[7]) + " " + str(split[4]) + " / " + str(split[5])
+		dateobjectstring = str(dateobject)
 		if dateobject in timedict:
-			timestart = split[6]
-			timeend = split[12]
-
-
-			print(str(timeend))
-			timedict[str(dateobject)] = timedict[str(dateobject)] + minhour
+			oldtime = timedict[dateobjectstring]
+			newtime = timedelta + int(oldtime)
+			timedict[dateobjectstring] = newtime
+			#timedict[str(dateobject)] = [timedict[str(dateobject)], str((timedelta + int(timedict.get(str(dateobject)))))]
 		else:
-			minhour = str(split[-1])
-			timedict[str(dateobject)] = minhour
+			#minhour = str(split[-1])
+			timedict[dateobjectstring] = str(timedelta)
+
 	return(timedict)
 
 def cal_weekly_usage(subject,login_recs):
