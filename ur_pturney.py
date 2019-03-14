@@ -225,9 +225,7 @@ def cal_monthly_usage(subject,login_recs):
 		month = dictmonth.get(month)
 
 		dateobject = str(split[7]) + " " + str(split[4]) + " " + str(split[5])
-		striptime = time.strptime(dateobject, "%Y %b %d")
-
-		dateobjectstring = split[7] + " " + monthnum
+		dateobjectstring = split[7] + " " + month
 		if dateobjectstring in timedict:
 			oldtime = timedict[dateobjectstring]
 			newtime = timedelta + int(oldtime)
@@ -267,7 +265,7 @@ if __name__ == '__main__':
 				print(user_or_host)
 		
 		#If running with -r (E.g. ./ur.py -r 10.0.0.1 test.txt)
-		if args.rhost is not None:
+		if args.rhost or args.user is not None:
 			#Grab the bulk file, and parse it
 			args.file = [str(sys.argv[5])]
 			login_rec = read_login_rec(args.file,args)
@@ -319,6 +317,20 @@ if __name__ == '__main__':
 			if "monthly" in timeframe:
 				monthly_dict = cal_monthly_usage(subject,login_rec)
 				print(monthly_dict)
+
+				line = "Monthly Usage Report for " + str(subject)
+				eq = len(line)
+				
+				print(line)
+				print("=" * eq)
+				print("%-15s %-15s" %("Month","Usage in Seconds"))
+				total = 0
+
+				for key, value in monthly_dict.items():
+					#print(str(key) + "	" + str(value))
+					print("%-10s %-10s" %(str(key),"    " + str(value)))
+					total = total + value
+				print("%-10s %-10s" %("Total","    " + str(total)))
 
 			
 	#[ based on the command line option, generate and print
