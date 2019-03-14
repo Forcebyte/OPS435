@@ -33,19 +33,11 @@ def get_login_rec(login_recs,args):
 	#Grab the Argument given, either user (wants the users logged in) or host (wants the host IP)
 	argument = str(args.list)
 
-
-	#Remove extra spaces from what we're dealing with. Unspaced becomes a filtered thing to grab from
-	unspaced = []
-	for item in login_recs:
-		while '  ' in item:
-			item = item.replace('  ',' ')
-			unspaced.append(item)
-
 	#If the argument is asking for the user list, run through and give users
 	if "user" in argument:
 		users = []
 		#Grab each user for each line
-		for item in unspaced:
+		for item in login_recs:
 			#split on each column, then grab first column
 			split = item.split()
 			user = split[0]
@@ -57,14 +49,12 @@ def get_login_rec(login_recs,args):
 	#If the argument is asking for the host list, run through and give hosts
 	if "host" in argument:
 		hosts = []
-		for item in unspaced:
+		for item in login_recs:
 			split = item.split()
-			host = split[3]
-			#If it is unique, add it to hosts
-			if item not in host:
-				hosts.append(item)
+			host = split[2]
+			if host not in hosts:
+				hosts.append(host)
 		return(hosts)
-
 
 def read_login_rec(filelist,args):
 	''' docstring for this function
@@ -109,13 +99,39 @@ def read_login_rec(filelist,args):
 	return login_rec
 
 
-
+def parse_time(s):
+    hour, min, sec = s.split(':')
+    try:
+        hour = int(hour)
+        min = int(min)
+        sec = int(sec)
+    except ValueError:
+        # handle errors here, but this isn't a bad default to ignore errors
+        return 0
+    return hour * 60 * 60 + min * 60 + sec
 def cal_daily_usage(subject,login_recs):
 	''' docstring for this function
 	generate daily usage report for the given 
 	subject (user or remote host)'''
 	#[ put your python code for this function here ]
 	#return daily_usage
+	timedict = {}
+	for item in login_recs:
+		#Split item into catagories
+		split = item.split()
+
+		dateobject = str(split[7]) + " / " + str(split[4]) + " / " + str(split[5])
+		if dateobject in timedict:
+			timestart = split[6]
+			timeend = split[12]
+
+
+			print(str(timeend))
+			timedict[str(dateobject)] = timedict[str(dateobject)] + minhour
+		else:
+			minhour = str(split[-1])
+			timedict[str(dateobject)] = minhour
+	return(timedict)
 
 def cal_weekly_usage(subject,login_recs):
 	''' docstring for this function
@@ -130,6 +146,17 @@ def cal_monthly_usage(subject,login_recs):
 	subject (user or remote host)'''
 	#[ put your python code for this function here ]
 	#return monthly_usage
+
+	# #If the argument is asking for the host list, run through and give hosts
+	# if "host" in argument:
+	# 	hosts = []
+	# 	for item in login_recs:
+	# 		split = item.split()
+	# 		host = split[2]
+	# 		if host not in hosts:
+	# 			hosts.append(host)
+	# 	return(hosts)
+
 	 
 if __name__ == '__main__':
 	import argparse
@@ -137,7 +164,7 @@ if __name__ == '__main__':
 	parser.add_argument("-F", "--file", help="list of files to be processed")
 	parser.add_argument("-l", "--list",  help="generate user name or remote host IP from the given files", nargs=2)
 	parser.add_argument("-r", "--rhost",  help="usage report for the given remote host IP")
-	parser.add_argument("-t", "--type",  help="type of report: daily, weekly, and monthly")
+	parser.add_argument("-t", "--type",  help="type of report: daily, weekly, and monthly", nargs=2)
 	parser.add_argument("-u", "--user", help="usage report for the given user name")
 	parser.add_argument("-v", "--verbose", help="turn on output verbosity")
 	#[ code to retrieve command line argument using the argparse module [
@@ -154,10 +181,37 @@ if __name__ == '__main__':
 			#Now that we are done, print the user or host involved by passing through each host/user in the list
 			for user_or_host in userhost_rec:
 				print(user_or_host)
-		#Test running with listing
-		#If running with -t (E.g. ./ur.py -u rchan -t daily usage_data_file)
-		if args.type is not None:
-			args.file= [args.file]
+		
+		#If running with -r (E.g. ./ur.py -r 10.0.0.1 test.txt)
+		if args.rhost is not None:
+			#Grab the bulk file, and parse it
+			args.file = [str(sys.argv[5])]
 			login_rec = read_login_rec(args.file,args)
+			
+			#In this case, the timeframe will be what the user wants
+			timeframe = str(sys.argv[4])
+
+
+			subject = str(sys.argv[2])
+
+			#If its the monthly timeframe, run it with the indicator if its the user or host
+			if "daily" in timeframe:
+				monthly_usage 	= cal_daily_usage(subject,login_rec)
+				print(monthly_usage)
+
+			if "weekly" in timeframe:
+				monthly_usage = cal_monthly_usage(subject,login_rec)
+				usagestring = """
+				Weekly Usage Report for 
+				=====================================
+				Week #        Usage in Seconds
+				"""
+			if "monthly" in timeframe:
+				monthly_usage = cal_monthly_usage(subject,login_rec)
+				usagestring = """
+				Weekly Usage Report for 
+				=====================================
+				Week #        Usage in Seconds
+				"""
 	#[ based on the command line option, generate and print
 	#  the requested usage report ]
