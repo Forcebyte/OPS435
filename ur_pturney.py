@@ -4,7 +4,7 @@
 
    __author__ Patrick Turney
    __date__ March 2018
-   __version__ 0.1
+   __version__ 0.5
  
    OPS435 Assignment 2 - Fall 2018
 	Program: ur_pturney.py
@@ -21,31 +21,44 @@
 import os 
 import sys
 import time
-
 from time import strftime
+
+
+
 def parse_time(s):
+	''' 
+	parse_time(str) -> timeinseconds
+		Takes a time string in HH:MM:SS format, then converts said time to seconds
+
+		e.g. parse_time('000100') -> 60
+				parse_time('005555') -> 3355
+	'''
+	#Split time into hours, minutes, and seconds
     hour, min, sec = s.split(':')
     try:
         hour = int(hour)
         min = int(min)
         sec = int(sec)
     except ValueError:
-        # handle errors here, but this isn't a bad default to ignore errors
+        print("INTERNAL CONVERSION ERROR")
         return 0
+    #60 Seconds > 1 minute, 60 minutes > 1 Hour... Convert all
     return hour * 60 * 60 + min * 60 + sec
 
 def get_login_rec(login_recs,args):
-	''' docstring for this fucntion
-	get records from the last command
-	filter out the unwanted records
-	add filtered record to list (login_recs)'''
-	#[ put your python code for this function here ]
-	#return login_recs
+	'''
+	get_login_rec(login_recs,args) -> hosts/users
+		takes a login list, along with a single (or list of ) argument(s)
+		returns a list of users, or hosts with that record, depending on the argument
 
-	#Grab the Argument given, either user (wants the users logged in) or host (wants the host IP)
+		e.g. get_login_rec(hosts,(192.168.1.1,192.168.1.2,192.168.1.2)) -> ["192.168.1.1","192.168.1.2"]
+				get_login_rec(usersdsksjgkjk,("john,paul,ron,paul,stephan")) -> ["john", "paul", "ron", "stephan"]
+	'''
+
+	#Grab every Argument given to the function, either user (wants the users logged in) or host (wants the host IP)
 	argument = str(args.list)
 
-	#If the argument is asking for the user list, run through and give users
+	#If the argument is asking for the user list, run through and give each unique user
 	if "user" in argument:
 		users = []
 		#Grab each user for each line
@@ -56,9 +69,10 @@ def get_login_rec(login_recs,args):
 			#If it is unique, add it to users
 			if user not in users:
 				users.append(user)
+		#Return a list of unique users
 		return(users)
 	
-	#If the argument is asking for the host list, run through and give hosts
+	#If the argument is asking for the host list, run through and give each unique host
 	if "host" in argument:
 		hosts = []
 		for item in login_recs:
@@ -66,22 +80,24 @@ def get_login_rec(login_recs,args):
 			host = split[2]
 			if host not in hosts:
 				hosts.append(host)
+		#Return a list of unique hosts
 		return(hosts)
 
 def read_login_rec(filelist,args):
-	''' docstring for this function
-	get records from given filelist
-	open and read each file from the filelist
-	filter out the unwanted records
-	add filtered record to list (login_recs)'''
-	#[ put your python code for this function here ]
+	'''
+	read_login_rec(fielist,args) -> Array_Of_ImportantLines
+		takes a list of files, along with a single (or list of ) argument(s)
+		returns each line of each file in which that the user (or host) is mentioned
 
+		e.g. read_login_rec(file.txt,argslist) -> Important lines for file.txt
+				read_login_rec([file.txt,file2.txt],argslist) -> Important lines for both file.txt and flle2.txt
+	'''
 	#If we're just given one file, add it to a single array
 	if isinstance(filelist, str):
 			filelist = [filelist]
+
 	#Takes each record from filelist, adds it to a list
 	unfiltered = []
-
 	#Read the record
 	for fileitem in filelist:
 			file = open(fileitem,"r")
@@ -111,12 +127,15 @@ def read_login_rec(filelist,args):
 	return login_rec
 
 
-def cal_daily_usage(subject,login_recs):
-	''' docstring for this function
-	generate daily usage report for the given 
-	subject (user or remote host)'''
-	#[ put your python code for this function here ]
-	#return daily_usage
+def cal_daily_usage(login_recs):
+	'''
+	cal_daily_usage(login_recs) -> timedict
+		takes the login record lines generated in read_login_rec, and calculates the daily usage of each user or host mentioned
+		finally, it returns a dictionary with each day, and the total time for that day
+		Note that this function depends on parse_time, as it calculates time's down to the second for outputting
+
+		e.g. cal_daily_usage(login_recs) -> Dictionary of time totals
+	'''
 	timedict = {}
 	for item in login_recs:
 		#Split item into catagories
@@ -152,12 +171,15 @@ def cal_daily_usage(subject,login_recs):
 			timedict[dateobjectstring] = str(timedelta)
 	return(timedict)
 
-def cal_weekly_usage(subject,login_recs):
-	''' docstring for this function
-	generate weekly usage report for the given 
-	subject (user or remote host)'''
-	#[ put your python code for this function here ]
-	#return weekly_usage
+def cal_weekly_usage(login_recs):
+	'''
+	cal_weekly_usage(login_recs) -> timedict
+		takes the login record lines generated in read_login_rec, and calculates the weekly usage of user or host mentioned
+		finally, it returns a dictionary with each week, and the total time for that week
+		Note that this function depends on parse_time, as it calculates time's down to the second for outputting
+
+		e.g. cal_weekly_usage(login_recs) -> Dictionary of time totals
+	'''
 	timedict = {}
 	for item in login_recs:
 		#Split item into catagories
@@ -194,12 +216,15 @@ def cal_weekly_usage(subject,login_recs):
 			timedict[dateobjectstring] = str(timedelta)
 	return(timedict)
 
-def cal_monthly_usage(subject,login_recs):
-	''' docstring for this function
-	generate monthly usage report fro the given
-	subject (user or remote host)'''
-	#[ put your python code for this function here ]
-	#return monthly_usage
+def cal_monthly_usage(login_recs):
+	'''
+	cal_monthly_usage(login_recs) -> timedict
+		takes the login record lines generated in read_login_rec, and calculates the monthly usage of each user or host mentioned
+		finally, it returns a dictionary with each month, and the total time for that month
+		Note that this function depends on parse_time, as it calculates time's down to the second for outputting
+
+		e.g. cal_monthly_usage(login_recs) -> Dictionary of time totals
+	'''
 	timedict = {}
 	for item in login_recs:
 		#Split item into catagories
@@ -236,12 +261,9 @@ def cal_monthly_usage(subject,login_recs):
 			timedict[dateobjectstring] = str(timedelta)
 	return(timedict)
 
-
-
-
-	 
 if __name__ == '__main__':
 	import argparse
+	#Initialize all arguments to parse in main
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-F", "--file", help="list of files to be processed")
 	parser.add_argument("-l", "--list",  help="generate user name or remote host IP from the given files", nargs=2)
@@ -252,7 +274,7 @@ if __name__ == '__main__':
 	#[ code to retrieve command line argument using the argparse module 
 	args = parser.parse_args()
 
-	#If there are arguments
+	#Run if arguments exist
 	if args is not None:
 		#If running with -l (E.g. ./ur.py -l user/host test.txt)
 		if args.list is not None:
@@ -331,7 +353,12 @@ if __name__ == '__main__':
 					print("%-10s %-10s" %(str(key),"    " + str(value)))
 					total = total + value
 				print("%-10s %-10s" %("Total","    " + str(total)))
-
-			
+else:
+	parser.print_help()
+class parser(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write('error: %s\n' % message)
+        self.print_help()
+        sys.exit(2)		
 	#[ based on the command line option, generate and print
 	#  the requested usage report ]
