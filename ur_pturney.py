@@ -97,6 +97,12 @@ def read_login_rec(filelist,args):
 
 	#Takes each record from filelist, adds it to a list
 	unfiltered = []
+
+	#If we're running verbosely, run with arguments for each file
+	if args.verbose is True:
+		print("Files to be processed:" + str(filelist))
+		print("Type of args for files " + str(type(filelist)))
+
 	#Read the record
 	for fileitem in filelist:
 			file = open(fileitem,"r")
@@ -126,7 +132,7 @@ def read_login_rec(filelist,args):
 	return login_rec
 
 
-def cal_daily_usage(login_recs):
+def cal_daily_usage(login_recs, args):
 	'''
 	cal_daily_usage(login_recs) -> timedict
 		takes the login record lines generated in read_login_rec, and calculates the daily usage of each user or host mentioned
@@ -135,7 +141,21 @@ def cal_daily_usage(login_recs):
 
 		e.g. cal_daily_usage(login_recs) -> Dictionary of time totals
 	'''
+
+	#If we're running verbosely, run with arguments for each file
+	if (args.verbose is True) and (args.user is not None):
+		print("Usage Report for User: " + str(args.user))
+		print("Usage Report Type " + str(args.type[0]))
+		print("processing usage report for the following: ")
+	elif (args.verbose is True) and (args.rhost is not None):
+		print("Usage Report for Remote Host: " + str(args.rhost))
+		print("Usage Report Type " + str(args.type[0]))
+		print("processing usage report for the following: ")
+
 	timedict = {}
+
+	if (args.verbose is True):
+			print("reading login/logout record files: [" + str(args.type[1])+ "]")
 	for item in login_recs:
 		#Split item into catagories
 		split = item.split()
@@ -173,7 +193,7 @@ def cal_daily_usage(login_recs):
 			timedict[dateobjectstring] = str(timedelta)
 	return(timedict)
 
-def cal_weekly_usage(login_recs):
+def cal_weekly_usage(login_recs,args):
 	'''
 	cal_weekly_usage(login_recs) -> timedict
 		takes the login record lines generated in read_login_rec, and calculates the weekly usage of user or host mentioned
@@ -183,6 +203,20 @@ def cal_weekly_usage(login_recs):
 		e.g. cal_weekly_usage(login_recs) -> Dictionary of time totals
 	'''
 	timedict = {}
+
+	#If we're running verbosely, run with arguments for each file
+	if (args.verbose is True) and (args.user is not None):
+		print("Usage Report for User: " + str(args.user))
+		print("Usage Report Type " + str(args.type[0]))
+		print("processing usage report for the following: ")
+	elif (args.verbose is True) and (args.rhost is not None):
+		print("Usage Report for Remote Host: " + str(args.rhost))
+		print("Usage Report Type " + str(args.type[0]))
+		print("processing usage report for the following: ")
+
+	if (args.verbose is True):
+			print("reading login/logout record files: [" + str(args.type[1])+ "]")
+
 	for item in login_recs:
 		#Split item into catagories
 		split = item.split()
@@ -220,7 +254,7 @@ def cal_weekly_usage(login_recs):
 			timedict[dateobjectstring] = str(timedelta)
 	return(timedict)
 
-def cal_monthly_usage(login_recs):
+def cal_monthly_usage(login_recs, args):
 	'''
 	cal_monthly_usage(login_recs) -> timedict
 		takes the login record lines generated in read_login_rec, and calculates the monthly usage of each user or host mentioned
@@ -229,6 +263,20 @@ def cal_monthly_usage(login_recs):
 
 		e.g. cal_monthly_usage(login_recs) -> Dictionary of time totals
 	'''
+
+	#If we're running verbosely, run with arguments for each file
+	if (args.verbose is True) and (args.user is not None):
+		print("Usage Report for User: " + str(args.user))
+		print("Usage Report Type " + str(args.type[0]))
+		print("processing usage report for the following: ")
+	elif (args.verbose is True) and (args.rhost is not None):
+		print("Usage Report for Remote Host: " + str(args.rhost))
+		print("Usage Report Type " + str(args.type[0]))
+		print("processing usage report for the following: ")
+
+	if (args.verbose is True):
+			print("reading login/logout record files: [" + str(args.type[1])+ "]")
+
 	timedict = {}
 	for item in login_recs:
 		#Split item into catagories
@@ -278,7 +326,7 @@ if __name__ == '__main__':
 	parser.add_argument("-r", "--rhost",  help="usage report for the given remote host IP")
 	parser.add_argument("-t", "--type",  help="type of report: daily, weekly, and monthly", nargs=2)
 	parser.add_argument("-u", "--user", help="usage report for the given user name")
-	parser.add_argument("-v", "--verbose", help="turn on output verbosity")
+	parser.add_argument("-v", "--verbose", help="turn on output verbosity", action="store_true")
 	#[ code to retrieve command line argument using the argparse module 
 	args = parser.parse_args()
 
@@ -287,9 +335,17 @@ if __name__ == '__main__':
 		#If running with -l (E.g. ./ur.py -l user/host test.txt)
 		if args.list is not None:
 			#Since we are running with -l, the file that we are using is specified in the fourth argument
+			subject = str(sys.argv[2])
 			args.file = [str(sys.argv[3])]
 			login_rec = read_login_rec(args.file,args)
 			userhost_rec = get_login_rec(login_rec,args)
+			
+			line = "List for " + str(subject) #str(args.file).capitalize() + 
+			eq = len(line)
+
+			print(line)
+			print("=" * eq)
+
 			#Now that we are done, print the user or host involved by passing through each host/user in the list
 			for user_or_host in userhost_rec:
 				print(user_or_host)
@@ -309,7 +365,10 @@ if __name__ == '__main__':
 			#If asking for a daily report (E.g. ./ur.py -r 10.0.0.1 daily test.txt)
 			if "daily" in timeframe:
 				#Grab the ditionary for daily usage
-				daily_dict 	= cal_daily_usage(login_rec)
+
+					#If we're running verbosely, run with arguments for each file
+
+				daily_dict 	= cal_daily_usage(login_rec,args)
 
 				line = "Daily Usage Report for " + str(subject)
 				eq = len(line)
@@ -327,7 +386,7 @@ if __name__ == '__main__':
 
 			#If asking for a weekly report (E.g. ./ur.py -r 10.0.0.1 weekly test.txt)
 			if "weekly" in timeframe:
-				weekly_dict = cal_weekly_usage(login_rec)
+				weekly_dict = cal_weekly_usage(login_rec,args)
 
 				line = "Weekly Usage Report for " + str(subject)
 				eq = len(line)
@@ -345,7 +404,7 @@ if __name__ == '__main__':
 
 			#If asking for a monthly report (E.g. ./ur.py -r 10.0.0.1 monthly test.txt)
 			if "monthly" in timeframe:
-				monthly_dict = cal_monthly_usage(login_rec)
+				monthly_dict = cal_monthly_usage(login_rec,args)
 				print(monthly_dict)
 
 				line = "Monthly Usage Report for " + str(subject)
