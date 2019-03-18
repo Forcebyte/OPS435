@@ -22,41 +22,18 @@ import os
 import sys
 import time
 from time import strftime
-import datetime
-
-def parse_time(s):
-	''' 
-	parse_time(str) -> timeinseconds
-		Takes a time string in HH:MM:SS format, then converts said time to seconds
-
-		e.g. parse_time('000100') -> 60
-				parse_time('005555') -> 3355
-	'''
-	#Split time into hours, minutes, and seconds
-	hour, min, sec = s.split(':')
-	try:
-		hour = int(hour)
-		min = int(min)
-		sec = int(sec)
-	except ValueError:
-		print("INTERNAL CONVERSION ERROR")
-		return 0
-	#60 Seconds > 1 minute, 60 minutes > 1 Hour... Convert all
-	return hour * 60 * 60 + min * 60 + sec
 
 def get_login_rec(login_recs,args):
 	'''
 	get_login_rec(login_recs,args) -> hosts/users
 		takes a login list, along with a single (or list of ) argument(s)
 		returns a list of users, or hosts with that record, depending on the argument
-
+	
 		e.g. get_login_rec(hosts,(192.168.1.1,192.168.1.2,192.168.1.2)) -> ["192.168.1.1","192.168.1.2"]
 				get_login_rec(usersdsksjgkjk,("john,paul,ron,paul,stephan")) -> ["john", "paul", "ron", "stephan"]
 	'''
-
 	#Grab every Argument given to the function, either user (wants the users logged in) or host (wants the host IP)
 	argument = str(args.list)
-
 	#If the argument is asking for the user list, run through and give each unique user
 	if "user" in argument:
 		users = []
@@ -95,14 +72,13 @@ def read_login_rec(filelist,args):
 	if isinstance(filelist, str):
 			filelist = [filelist]
 
-	#Takes each record from filelist, adds it to a list
-	unfiltered = []
-
 	#If we're running verbosely, run with arguments for each file
 	if args.verbose is True:
 		print("Files to be processed:" + str(filelist))
 		print("Type of args for files " + str(type(filelist)))
 
+	#Takes each record from filelist, adds it to a list
+	unfiltered = []
 	#Read the record
 	for fileitem in filelist:
 			file = open(fileitem,"r")
@@ -131,7 +107,6 @@ def read_login_rec(filelist,args):
 	login_rec = filteredfinal
 	return login_rec
 
-
 def cal_daily_usage(login_recs, args):
 	'''
 	cal_daily_usage(login_recs) -> timedict
@@ -141,7 +116,6 @@ def cal_daily_usage(login_recs, args):
 
 		e.g. cal_daily_usage(login_recs) -> Dictionary of time totals
 	'''
-
 	#If we're running verbosely, run with arguments for each file
 	if (args.verbose is True) and (args.user is not None):
 		print("Usage Report for User: " + str(args.user))
@@ -151,11 +125,11 @@ def cal_daily_usage(login_recs, args):
 		print("Usage Report for Remote Host: " + str(args.rhost))
 		print("Usage Report Type " + str(args.type[0]))
 		print("processing usage report for the following: ")
-
-	timedict = {}
-
 	if (args.verbose is True):
 			print("reading login/logout record files: [" + str(args.type[1])+ "]")
+
+
+	timedict = {}
 	for item in login_recs:
 		#Split item into catagories
 		split = item.split()
@@ -168,8 +142,7 @@ def cal_daily_usage(login_recs, args):
 		enddate_obj = time.strptime(enddate_str, '%b %d %H:%M:%S %Y')
 
 		#Generate a date object to use in the dictionary we will check against and later add to
-		dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
-
+		dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}	
 
 		#If the entry is not on the same day, we take the median date between the two
 		#After taking the median day, startdate usage is equal to the median day minus the startdate
@@ -178,9 +151,9 @@ def cal_daily_usage(login_recs, args):
 			modday = enddate_str[0:6] + " " + enddate_str[16::]
 			nextday = time.strptime(modday, '%b %d %Y')
 
+			###############################################################################
 			#Previous day (12:00 - XX:XX) Time Difference
-			prvday_timediff = (time.mktime(nextday) - time.mktime(startdate_obj))
-			prvday_timediff = str(round(prvday_timediff))
+			prvday_timediff = str(int((time.mktime(nextday) - time.mktime(startdate_obj))))
 
 			#In this case, dateobject will be the beginning section of our string
 			month = str(split[4])
@@ -189,20 +162,15 @@ def cal_daily_usage(login_recs, args):
 			#If entry is in our time dictionary, add it to the date mentioned
 			#If not, create a new entry
 			if dateobject in timedict:
-				oldtime = timedict[dateobject]
-				newtime = int(prvday_timediff) + int(oldtime) - 2
-				print(newtime)
+				newtime = int(prvday_timediff) + int(timedict[dateobject]) - 2
 				timedict[dateobject] = newtime
-				print(timedict)
 			else:
 				timedict[dateobject] = str(prvday_timediff)
-				print(timedict)
 
+			###############################################################################
 			#In this case, dateobject will be the beginning section of our string
-			month = str(split[10])
-			month = dictmonth.get(month)
+			month = dictmonth.get(str(split[10]))
 			dateobject = str(split[13]) + " " + month + " " + str(split[11])	
-
 			#Next Day (XX:XX - 12:00) Time Difference
 			nxtday_timediff = (time.mktime(enddate_obj) - (time.mktime(nextday)))
 			nxtday_timediff = str(round(nxtday_timediff))
@@ -210,35 +178,25 @@ def cal_daily_usage(login_recs, args):
 			if dateobject in timedict:
 				oldtime = timedict[dateobject]
 				newtime = int(nxtday_timediff) + int(oldtime)
-				print(newtime)
 				timedict[dateobject] = newtime
-				print(timedict)
 			else:
 				timedict[dateobject] = str(nxtday_timediff)
-				print(timedict)
+			###############################################################################
 		else:
 			month = str(split[4])
 			month = dictmonth.get(month)
 			dateobject = str(split[7]) + " " + month + " " + str(split[5])
-			dateobject = str(dateobject)
 
 			#Get the difference between those dates, and store it to timediff
-			timediff = (time.mktime(enddate_obj) - time.mktime(startdate_obj))
-			print(time.mktime(enddate_obj))
-			print(time.mktime(startdate_obj))
-			timediff = round(timediff)
-			timediff = str(timediff)
+			timediff = str(int((time.mktime(enddate_obj) - time.mktime(startdate_obj))))
 			#If entry is in our time dictionary, add it to the date mentioned
 			#If not, create a new entry
 			if dateobject in timedict:
 				oldtime = timedict[dateobject]
 				newtime = int(timediff) + int(oldtime)
-				print(newtime)
 				timedict[dateobject] = newtime
-				print(timedict)
 			else:
 				timedict[dateobject] = str(timediff)
-				print(timedict)
 	return(timedict)
 
 
@@ -271,43 +229,34 @@ def cal_weekly_usage(login_recs,args):
 		split = item.split()
 
 		#Turns date into format similar to "Dec 30 23:38:51 2017"
-		startdate_str = str((' '.join(split[4:8])))
-		enddate_str = str((' '.join(split[10:14])))
+		startdate_str = str((' '.join(split[3:8])))
+		enddate_str = str((' '.join(split[9:14])))
 		#Convert both of those dates to time objects
-		startdate_obj = time.strptime(startdate_str, '%b %d %H:%M:%S %Y')
-		enddate_obj = time.strptime(enddate_str, '%b %d %H:%M:%S %Y')
+		startdate_obj = time.strptime(startdate_str)
+		enddate_obj = time.strptime(enddate_str)
 
 		#Grab a week number from each entry to compare (%U is week number from 0-51)
-		startdate_wk = str(strftime("%U", startdate_obj))
-		enddate_wk = str(strftime("%U", enddate_obj))
+		startdate_wk = strftime("%W", startdate_obj)
+		enddate_wk = strftime("%W", enddate_obj)
 
-		#Since week 1 is 0, we add 1 to the weeknumber to get our actual week
-		startdate_wk = str(int(startdate_wk))
-		enddate_wk = str(int(enddate_wk))
-
-		#generates a date object to use in the dictionary we will comapre to
-		#dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
-
+	
 		#If the entry is not on the same week, we take the median date between the two
 		#After taking the median day, startdate usage is equal to the median day minus the startdate
 		#Likewise, the ending day is just equal to the ending time...
-		print(startdate_wk)
-		print(enddate_wk)
 		if startdate_wk != enddate_wk:
 			modday = enddate_str[0:6] + " " + enddate_str[16::]
-			print(modday)
 			nextday = time.strptime(modday, '%b %d %Y')
 
+		
 			#Previous day (12:00 - XX:XX) time difference, take it and round it out
 			prvday_timediff = (time.mktime(nextday) - time.mktime(startdate_obj))
-			prvday_timediff = str(round(prvday_timediff))
 
 			#In this case, dateobject will be the beginning section of our string
 
 			dateobject = str(split[13])	+ " " + str(startdate_wk)
 			if dateobject in timedict:
 				oldtime = timedict[dateobject]
-				newtime = int(prvday_timediff) + int(oldtime) - 2
+				newtime = int(prvday_timediff) + int(oldtime)
 				timedict[dateobject] = newtime
 			else:
 				timedict[dateobject] = str(prvday_timediff)
@@ -317,30 +266,31 @@ def cal_weekly_usage(login_recs,args):
 			dateobject = str(split[13]) + " " + str(enddate_wk)
 			#Next Day (XX:XX - 12:00) Time Difference
 			nxtday_timediff = (time.mktime(enddate_obj) - (time.mktime(nextday)))
-			nxtday_timediff = str(round(nxtday_timediff))
 
 			if dateobject in timedict:
 				oldtime = timedict[dateobject]
-				newtime = int(nxtday_timediff) + int(oldtime) - 2
+				newtime = int(nxtday_timediff) + int(oldtime)
 				timedict[dateobject] = newtime
 			else:
 				timedict[dateobject] = str(nxtday_timediff)
 		else:
 			dateobject = str(split[13]) + " " + str(startdate_wk)
 			dateobject = str(dateobject)
+			print("Dateobject = " + dateobject)
 
 			#Get the difference between those dates, and store it to timediff
 			timediff = (time.mktime(enddate_obj) - time.mktime(startdate_obj))
-			timediff = round(timediff)
-			timediff = str(timediff)
+
 			#If entry is in our time dictionary, add it to the date mentioned
 			#If not, create a new entry
 			if dateobject in timedict:
 				oldtime = timedict[dateobject]
 				newtime = int(timediff) + int(oldtime)
+				print("Adding" + str(timediff) + " to " + str(oldtime))
 				timedict[dateobject] = newtime
 			else:
-				timedict[dateobject] = str(timediff)
+				timedict[dateobject] = int(timediff)
+				print("new value" + str(timediff))	
 	return(timedict)
 
 def cal_monthly_usage(login_recs, args):
@@ -438,6 +388,23 @@ def cal_monthly_usage(login_recs, args):
 				timedict[dateobject] = str(timediff)
 				print(timedict)
 	return(timedict)
+def print_statement(dictionary,usertype,subject):
+	line = str(usertype) + "ly Usage Report for " + str(subject)
+	eq = len(line)
+	print(line)
+	print ("=" * eq)  
+	if str(usertype) == "Dai":
+		print("%-15s %-15s" %("Date","Usage in Seconds"))
+	if str(usertype) == "Weekly":
+		print("%-15s %-15s" %("Week #","Usage in Seconds"))
+	if str(usertype) == "Month":
+		print("%-15s %-15s" %("Month","Usage in Seconds"))
+
+	total = 0
+	for key, value in sorted(dictionary.items(),reverse=True):
+		print("%-10s %-10s" %(str(key),"    " + str(value)))
+		total = total + value
+	print("%-10s %-10s" %("Total","    " + str(total)))
 
 if __name__ == '__main__':
 	import argparse
@@ -487,65 +454,55 @@ if __name__ == '__main__':
 			#If asking for a daily report (E.g. ./ur.py -r 10.0.0.1 daily test.txt)
 			if "daily" in timeframe:
 				#Grab the ditionary for daily usage
-
-					#If we're running verbosely, run with arguments for each file
-
 				daily_dict 	= cal_daily_usage(login_rec,args)
-				line = "Daily Usage Report for " + str(subject)
-				eq = len(line)
-				print(line)
-				print("=" * eq)
-				print("%-15s %-15s" %("Date","Usage in Seconds"))
-				total = 0
-
-				#Since the dictionary isn't sorted by value, we need to sort it before we iterate
-
-				for key, value in sorted(daily_dict.items(), reverse=True):
-					#print(str(key) + "	" + str(value))
-					print("%-10s %-10s" %(str(key),"    " + str(value)))
-					total = total + int(value)
-				print("%-10s %-10s" %("Total","    " + str(total)))
+				print_statement(daily_dict,"Dai",subject)
+				# eq = len(line)
+				# print(line)
+				# print("=" * eq)
+				# print("%-15s %-15s" %("Date","Usage in Seconds"))
+				# total = 0
+				# for key, value in sorted(daily_dict.items(), reverse=True):
+				# 	#print(str(key) + "	" + str(value))
+				# 	print("%-10s %-10s" %(str(key),"    " + str(value)))
+				# 	total = total + int(value)
+				# print("%-10s %-10s" %("Total","    " + str(total)))
 
 			#If asking for a weekly report (E.g. ./ur.py -r 10.0.0.1 weekly test.txt)
 			if "weekly" in timeframe:
 				weekly_dict = cal_weekly_usage(login_rec,args)
+				print_statement(weekly_dict,"Week",subject)
 
-				line = "Weekly Usage Report for " + str(subject)
-				eq = len(line)
-				
-				print(line)
-				print("=" * eq)
-				print("%-15s %-15s" %("Week #","Usage in Seconds"))
-				total = 0
-
-				for key, value in sorted(weekly_dict.items(),reverse=True):
-					#print(str(key) + "	" + str(value))
-					print("%-10s %-10s" %(str(key),"    " + str(value)))
-					total = total + int(value)
-				print("%-10s %-10s" %("Total","    " + str(total)))
+				# eq = len(line)
+				# print(line)
+				# print("=" * eq)
+				# print("%-15s %-15s" %("Week #","Usage in Seconds"))
+				# total = 0
+				# for key, value in sorted(weekly_dict.items(),reverse=True):
+				# 	#print(str(key) + "	" + str(value))
+				# 	print("%-10s %-10s" %(str(key),"    " + str(value)))
+				# 	total = total + int(value)
+				# print("%-10s %-10s" %("Total","    " + str(total)))
 
 			#If asking for a monthly report (E.g. ./ur.py -r 10.0.0.1 monthly test.txt)
 			if "monthly" in timeframe:
 				monthly_dict = cal_monthly_usage(login_rec,args)
-				print(monthly_dict)
+				print_statement(monthly_dict,"Month",subject)
 
-				line = "Monthly Usage Report for " + str(subject)
-				eq = len(line)
-				
-				print(line)
-				print("=" * eq)
-				print("%-15s %-15s" %("Month","Usage in Seconds"))
-				total = 0
-
-				for key, value in sorted(monthly_dict.items(),reverse=True):
-					#print(str(key) + "	" + str(value))
-					print("%-10s %-10s" %(str(key),"    " + str(value)))
-					total = total + value
-				print("%-10s %-10s" %("Total","    " + str(total)))
+				# line = "Monthly Usage Report for " + str(subject)
+				# eq = len(line)
+				# print(line)
+				# print("=" * eq)
+				# print("%-15s %-15s" %("Month","Usage in Seconds"))
+				# total = 0
+				# for key, value in sorted(monthly_dict.items(),reverse=True):
+				# 	#print(str(key) + "	" + str(value))
+				# 	print("%-10s %-10s" %(str(key),"    " + str(value)))
+				# 	total = total + value
+				# print("%-10s %-10s" %("Total","    " + str(total)))
 else:
 	parser.print_help()
 class parser(argparse.ArgumentParser):
 	def error(self, message):
 		sys.stderr.write('error: %s\n' % message)
-		self.print_help()
+		parser.print_help()
 		sys.exit(2)		
