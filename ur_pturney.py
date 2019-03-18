@@ -456,32 +456,13 @@ if __name__ == '__main__':
 				#Grab the ditionary for daily usage
 				daily_dict 	= cal_daily_usage(login_rec,args)
 				print_statement(daily_dict,"Dai",subject)
-				# eq = len(line)
-				# print(line)
-				# print("=" * eq)
-				# print("%-15s %-15s" %("Date","Usage in Seconds"))
-				# total = 0
-				# for key, value in sorted(daily_dict.items(), reverse=True):
-				# 	#print(str(key) + "	" + str(value))
-				# 	print("%-10s %-10s" %(str(key),"    " + str(value)))
-				# 	total = total + int(value)
-				# print("%-10s %-10s" %("Total","    " + str(total)))
+
 
 			#If asking for a weekly report (E.g. ./ur.py -r 10.0.0.1 weekly test.txt)
 			if "weekly" in timeframe:
 				weekly_dict = cal_weekly_usage(login_rec,args)
 				print_statement(weekly_dict,"Week",subject)
 
-				# eq = len(line)
-				# print(line)
-				# print("=" * eq)
-				# print("%-15s %-15s" %("Week #","Usage in Seconds"))
-				# total = 0
-				# for key, value in sorted(weekly_dict.items(),reverse=True):
-				# 	#print(str(key) + "	" + str(value))
-				# 	print("%-10s %-10s" %(str(key),"    " + str(value)))
-				# 	total = total + int(value)
-				# print("%-10s %-10s" %("Total","    " + str(total)))
 
 			#If asking for a monthly report (E.g. ./ur.py -r 10.0.0.1 monthly test.txt)
 			if "monthly" in timeframe:
