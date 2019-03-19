@@ -34,20 +34,16 @@ def get_login_rec(login_recs,args):
 	'''
 	#Grab every Argument given to the function, either user (wants the users logged in) or host (wants the host IP)
 	argument = str(args.list)
-	#If the argument is asking for the user list, run through and give each unique user
+	#If the argument is asking for the user list, run through and give each line that contains that unique user
 	if "user" in argument:
 		users = []
-		#Grab each user for each line
 		for item in login_recs:
-			#split on each column, then grab first column
 			split = item.split()
 			user = split[0]
-			#If it is unique, add it to users
 			if user not in users:
 				users.append(user)
 		#Return a list of unique users
 		return(users)
-	
 	#If the argument is asking for the host list, run through and give each unique host
 	if "host" in argument:
 		hosts = []
@@ -249,7 +245,7 @@ def cal_weekly_usage(login_recs,args):
 
 		
 			#Previous day (12:00 - XX:XX) time difference, take it and round it out
-			prvday_timediff = (time.mktime(nextday) - time.mktime(startdate_obj))
+			prvday_timediff = (time.mktime(nextday) - time.mktime(startdate_obj)) - 2
 
 			#In this case, dateobject will be the beginning section of our string
 
@@ -265,7 +261,7 @@ def cal_weekly_usage(login_recs,args):
 			#Date Object to compare to our dictionary
 			dateobject = str(split[13]) + " " + str(enddate_wk)
 			#Next Day (XX:XX - 12:00) Time Difference
-			nxtday_timediff = (time.mktime(enddate_obj) - (time.mktime(nextday)))
+			nxtday_timediff = (time.mktime(enddate_obj) - (time.mktime(nextday))) - 2
 
 			if dateobject in timedict:
 				oldtime = timedict[dateobject]
@@ -279,7 +275,7 @@ def cal_weekly_usage(login_recs,args):
 			print("Dateobject = " + dateobject)
 
 			#Get the difference between those dates, and store it to timediff
-			timediff = (time.mktime(enddate_obj) - time.mktime(startdate_obj))
+			timediff = (time.mktime(enddate_obj) - time.mktime(startdate_obj)) - 2
 
 			#If entry is in our time dictionary, add it to the date mentioned
 			#If not, create a new entry
@@ -468,18 +464,6 @@ if __name__ == '__main__':
 			if "monthly" in timeframe:
 				monthly_dict = cal_monthly_usage(login_rec,args)
 				print_statement(monthly_dict,"Month",subject)
-
-				# line = "Monthly Usage Report for " + str(subject)
-				# eq = len(line)
-				# print(line)
-				# print("=" * eq)
-				# print("%-15s %-15s" %("Month","Usage in Seconds"))
-				# total = 0
-				# for key, value in sorted(monthly_dict.items(),reverse=True):
-				# 	#print(str(key) + "	" + str(value))
-				# 	print("%-10s %-10s" %(str(key),"    " + str(value)))
-				# 	total = total + value
-				# print("%-10s %-10s" %("Total","    " + str(total)))
 else:
 	parser.print_help()
 class parser(argparse.ArgumentParser):
