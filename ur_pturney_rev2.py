@@ -81,7 +81,7 @@ def read_login_rec(filelist,args):
 			unfiltered.extend(file.read().splitlines())
 
 	#If there is an rhost argument (filter by IP), we filter by IP and add it to filtered
-	# If there isn't just set filtered to be unfiltered for future filtering
+	#If there isn't just set filtered to be unfiltered for future filtering
 	filtered = []
 	if args.rhost is not None:
 		rhost = str(args.rhost)
@@ -102,6 +102,58 @@ def read_login_rec(filelist,args):
 			filteredfinal = filtered
 	login_rec = filteredfinal
 	return login_rec
+
+def bwteendays(timedict, split, args):
+	'''
+	Take login record that is not on the same day, and add it to respective records
+	'''
+	dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}	
+	#Get both the starting and ending date
+	startdate_obj = time.strptime(str((' '.join(split[3:8]))))
+	enddate_obj = time.strptime(str((' '.join(split[9:14]))))
+
+	#Get midnight of the ending date's day (midnight of next day)
+	nextday = strftime('%d %m %y',enddate_obj)
+	nextday = time.strptime(nextday, '%d %m %y')
+	month = dictmonth.get(str(split[4]))
+	#Get dateobject, depending on args
+	timeframe = str(sys.argv[4])
+	if timeframe == "daily":
+		begdateobject = str(split[7]) + " " + month + " " + str(split[5])
+		enddateobject = str(split[13]) + " " + month + " " + str(split[11])
+	if timeframe == "weekly":
+		startdate_wk = strftime("%W", startdate_obj)
+		enddate_wk = strftime("%W", enddate_obj)
+		begdateobject = str(split[13]) + " " + str(enddate_wk)
+		enddateobject = str(split[13]) + " " + str(enddate_wk)
+	if timeframe == "monthly":
+		begdateobject = str(split[7]) + " " + month
+		enddateobject = str(split[13]) + " " + month
+
+	#################################################
+	#Previous day time difference calculations
+	#Get time difference between for the previous day
+	prvday_timediff = (time.mktime(nextday) - time.mktime(startdate_obj))
+
+
+	if begdateobject in timedict:
+		oldtime = timedict[begdateobject]
+		newtime = int(float(prvday_timediff)) + int(float(oldtime)) - 2
+		timedict[begdateobject] = newtime
+	else:
+		timedict[begdateobject] = str(prvday_timediff)
+	#################################################
+	#Next day time difference calculations
+	#	Get time difference for the next day (12:00 - nxtday)
+	nxtday_timediff = (time.mktime(enddate_obj) - (time.mktime(nextday)))
+	month = dictmonth.get(str(split[10]))
+	if enddateobject in timedict:
+		oldtime = timedict[enddateobject]
+		newtime = int(float(prvday_timediff)) + int(float(oldtime))
+		timedict[enddateobject] = newtime
+	else:
+		timedict[enddateobject] = int(float(nxtday_timediff))
+	return(timedict)
 
 def cal_daily_usage(login_recs, args):
 	'''
@@ -131,53 +183,20 @@ def cal_daily_usage(login_recs, args):
 		split = item.split()
 
 		#Turns date into format similar to "Dec 30 23:38:51 2017"
-		startdate_str = str((' '.join(split[4:8])))
-		enddate_str = str((' '.join(split[10:14])))
-		#Convert both of those dates to time objects
-		startdate_obj = time.strptime(startdate_str, '%b %d %H:%M:%S %Y')
-		enddate_obj = time.strptime(enddate_str, '%b %d %H:%M:%S %Y')
+		startdate_obj = time.strptime(str((' '.join(split[3:8]))))
+		enddate_obj = time.strptime(str((' '.join(split[9:14]))))
 
 		#Generate a date object to use in the dictionary we will check against and later add to
 		dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}	
 
+		startdate_dy = strftime("%d", startdate_obj)
+		enddate_dy = strftime("%d", enddate_obj)
+
 		#If the entry is not on the same day, we take the median date between the two
 		#After taking the median day, startdate usage is equal to the median day minus the startdate
 		#Likewise, the ending day is just equal to the ending time...
-		if startdate_str[4:6] != enddate_str[4:6]:
-			modday = enddate_str[0:6] + " " + enddate_str[16::]
-			nextday = time.strptime(modday, '%b %d %Y')
-
-			###############################################################################
-			#Previous day (12:00 - XX:XX) Time Difference
-			prvday_timediff = str(int((time.mktime(nextday) - time.mktime(startdate_obj))))
-
-			#In this case, dateobject will be the beginning section of our string
-			month = str(split[4])
-			month = dictmonth.get(month)
-			dateobject = str(split[7]) + " " + month + " " + str(split[5])			
-			#If entry is in our time dictionary, add it to the date mentioned
-			#If not, create a new entry
-			if dateobject in timedict:
-				newtime = int(prvday_timediff) + int(timedict[dateobject]) - 2
-				timedict[dateobject] = newtime
-			else:
-				timedict[dateobject] = str(prvday_timediff)
-
-			###############################################################################
-			#In this case, dateobject will be the beginning section of our string
-			month = dictmonth.get(str(split[10]))
-			dateobject = str(split[13]) + " " + month + " " + str(split[11])	
-			#Next Day (XX:XX - 12:00) Time Difference
-			nxtday_timediff = (time.mktime(enddate_obj) - (time.mktime(nextday)))
-			nxtday_timediff = str(round(nxtday_timediff))
-
-			if dateobject in timedict:
-				oldtime = timedict[dateobject]
-				newtime = int(nxtday_timediff) + int(oldtime)
-				timedict[dateobject] = newtime
-			else:
-				timedict[dateobject] = str(nxtday_timediff)
-			###############################################################################
+		if  startdate_dy != enddate_dy:
+			timedict = bwteendays(timedict, split, args)
 		else:
 			month = str(split[4])
 			month = dictmonth.get(month)
@@ -224,29 +243,26 @@ def cal_weekly_usage(login_recs,args):
 		#Split item into catagories
 		split = item.split()
 
-		#Turns date into format similar to "Dec 30 23:38:51 2017"
-		startdate_str = str((' '.join(split[3:8])))
-		enddate_str = str((' '.join(split[9:14])))
+
 		#Convert both of those dates to time objects
-		startdate_obj = time.strptime(startdate_str)
-		enddate_obj = time.strptime(enddate_str)
+		startdate_obj = time.strptime(str((' '.join(split[3:8]))))
+		enddate_obj = time.strptime(str((' '.join(split[9:14]))))
 
 		#Grab a week number from each entry to compare (%U is week number from 0-51)
 		startdate_wk = strftime("%W", startdate_obj)
 		enddate_wk = strftime("%W", enddate_obj)
 
-	
 		#If the entry is not on the same week, we take the median date between the two
 		#After taking the median day, startdate usage is equal to the median day minus the startdate
 		#Likewise, the ending day is just equal to the ending time...
 		if startdate_wk != enddate_wk:
-			modday = enddate_str[0:6] + " " + enddate_str[16::]
-			nextday = time.strptime(modday, '%b %d %Y')
+			nextday = strftime("%d %m %Y",enddate_obj)
+			nextday = time.strptime(nextday, '%d %m %Y')
+
 
 			###############################################################################
 			#Previous day (12:00 - XX:XX) time difference, take it and round it out
 			prvday_timediff = (time.mktime(nextday) - time.mktime(startdate_obj))
-
 			#In this case, dateobject will be the beginning section of our string
 
 			dateobject = str(split[13])	+ " " + str(startdate_wk)
