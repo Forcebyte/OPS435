@@ -64,25 +64,21 @@ def read_login_rec(filelist,args):
 		e.g. read_login_rec(file.txt,argslist) -> Important lines for file.txt
 				read_login_rec([file.txt,file2.txt],argslist) -> Important lines for both file.txt and flle2.txt
 	'''
+	if isinstance(filelist, str):
+		filelist = [filelist]
 	if (args.verbose is True) and (args.user is not None):
 		print("Usage Report for User: " + str(args.user))
 		print("Usage Report Type " + str(args.type[0]))
 		print("processing usage report for the following: ")
+		print("reading login/logout record files: " + str(filelist))
 	elif (args.verbose is True) and (args.rhost is not None):
 		print("Usage Report for Remote Host: " + str(args.rhost))
 		print("Usage Report Type " + str(args.type[0]))
 		print("processing usage report for the following: ")
-	if (args.verbose is True):
-			print("reading login/logout record files: [" + str(args.type[1])+ "]")
-
-	#If we're just given one file, add it to a single array
-	if isinstance(filelist, str):
-			filelist = [filelist]
-
-	#If we're running verbosely, run with arguments for each file
-	if args.verbose is True:
-		print("Files to be processed:" + str(filelist))
-		print("Type of args for files " + str(type(filelist)))
+		print("reading login/logout record files: " + str(filelist))
+	elif (args.verbose is True and args.list):
+		print("reading login/logout record files: " + str(filelist))
+		print("processing usage report for the following: ")
 
 	#Takes each record from filelist, adds it to a list
 	unfiltered = []
@@ -147,8 +143,6 @@ def cal_daily_usage(login_recs, args):
 		e.g. cal_daily_usage(login_recs) -> Dictionary of time totals
 	'''
 	#If we're running verbosely, run with arguments for each file
-	
-
 	timedict = {}
 	for item in login_recs:
 		#Split item into catagories
@@ -357,14 +351,20 @@ if __name__ == '__main__':
 
 	#Run if arguments exist
 	if args is not None:
+		#If we're running verbosely, run with arguments for each file
 		#If running with -l (E.g. ./ur.py -l user/host test.txt)
 		if args.list is not None:
 			#Since we are running with -l, the file that we are using is specified in the fourth argument
 			subject = str(sys.argv[2])
 			args.file = [str(sys.argv[3])]
+			if args.verbose is True:
+				print("Files to be processed " + str(args.list[1]))
+				print("Types of args for files <class 'list'>")
 			login_rec = read_login_rec(args.file,args)
 			userhost_rec = get_login_rec(login_rec,args)
 			userhost_rec.sort()
+			if args.verbose is True:
+				print("Generating list for " + subject)
 			item = (str(args.list[0])).capitalize()
 			line = str(item) + " list for " + str(args.list[1])
 			eq = len(line)
@@ -377,6 +377,11 @@ if __name__ == '__main__':
 		
 		#If running with -r (E.g. ./ur.py -r 10.0.0.1 test.txt)
 		if args.rhost or args.user is not None:
+			if args.verbose is True:
+				placeholder = []
+				placeholder.append(str(sys.argv[5]))
+				print("Files to be processed " + str(placeholder))
+				print("Types of args for files " + str(type(placeholder)))
 			#Grab the bulk file, and parse it
 			args.file = [str(sys.argv[5])]
 			login_rec = read_login_rec(args.file,args)
