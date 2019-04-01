@@ -67,17 +67,17 @@ def read_login_rec(filelist,args):
 	if isinstance(filelist, str):
 		filelist = [filelist]
 	if (args.verbose is True) and (args.user is not None):
-		print("Usage Report for User: " + str(args.user))
-		print("Usage Report Type " + str(args.type[0]))
+		print("usage report for user: " + str(args.user))
+		print("usage report type: " + str(args.type[0]))
 		print("processing usage report for the following: ")
-		print("reading login/logout record files: " + str(filelist))
+		print("reading login/logout record files " + str(filelist))
 	elif (args.verbose is True) and (args.rhost is not None):
-		print("Usage Report for Remote Host: " + str(args.rhost))
-		print("Usage Report Type " + str(args.type[0]))
+		print("usage report for remote host: " + str(args.rhost))
+		print("usage report type: " + str(args.type[0]))
 		print("processing usage report for the following: ")
-		print("reading login/logout record files: " + str(filelist))
+		print("reading login/logout record files " + str(filelist))
 	elif (args.verbose is True and args.list):
-		print("reading login/logout record files: " + str(filelist))
+		print("reading login/logout record files " + str(filelist))
 		print("processing usage report for the following: ")
 
 	#Takes each record from filelist, adds it to a list
@@ -206,24 +206,9 @@ def cal_weekly_usage(login_recs,args):
 	'''
 	timedict = {}
 
-	#If we're running verbosely, run with arguments for each file
-	if (args.verbose is True) and (args.user is not None):
-		print("Usage Report for User: " + str(args.user))
-		print("Usage Report Type " + str(args.type[0]))
-		print("processing usage report for the following: ")
-	elif (args.verbose is True) and (args.rhost is not None):
-		print("Usage Report for Remote Host: " + str(args.rhost))
-		print("Usage Report Type " + str(args.type[0]))
-		print("processing usage report for the following: ")
-
-	if (args.verbose is True):
-			print("reading login/logout record files: [" + str(args.type[1])+ "]")
-
 	for item in login_recs:
 		#Split item into catagories
 		split = item.split()
-
-
 		#Convert both of those dates to time objects
 		startdate_obj = time.strptime(str((' '.join(split[3:8]))))
 		enddate_obj = time.strptime(str((' '.join(split[9:14]))))
@@ -262,19 +247,7 @@ def cal_weekly_usage(login_recs,args):
 	return(timedict)
 
 def cal_monthly_usage(login_recs, args):
-	#If we're running verbosely, run with arguments for each file
-	if (args.verbose is True) and (args.user is not None):
-		print("Usage Report for User: " + str(args.user))
-		print("Usage Report Type " + str(args.type[0]))
-		print("processing usage report for the following: ")
-	elif (args.verbose is True) and (args.rhost is not None):
-		print("Usage Report for Remote Host: " + str(args.rhost))
-		print("Usage Report Type " + str(args.type[0]))
-		print("processing usage report for the following: ")
-
 	timedict = {}
-	if (args.verbose is True):
-		print("reading login/logout record files: [" + str(args.type[1])+ "]")
 	for item in login_recs:
 		#Split item into catagories
 		split = item.split()
@@ -325,16 +298,16 @@ def print_statement(dictionary,usertype,subject):
 	print ("=" * eq)  
 	if str(usertype) == "Dai":
 		print("%-15s %-15s" %("Date","Usage in Seconds"))
-	if str(usertype) == "Weekly":
+	if str(usertype) == "Week":
 		print("%-15s %-15s" %("Week #","Usage in Seconds"))
 	if str(usertype) == "Month":
 		print("%-15s %-15s" %("Month","Usage in Seconds"))
 
 	total = 0
 	for key, value in sorted(dictionary.items(),reverse=True):
-		print("%-10s %-10s" %(str(key),"    " + str(value)))
+		print("%-15s %-10s" %(str(key),"    " + str(value)))
 		total = total + int(value)
-	print("%-10s %-10s" %("Total","    " + str(total)))
+	print("%-15s %-10s" %("Total","    " + str(total)))
 
 if __name__ == '__main__':
 	import argparse
@@ -358,8 +331,8 @@ if __name__ == '__main__':
 			subject = str(sys.argv[2])
 			args.file = [str(sys.argv[3])]
 			if args.verbose is True:
-				print("Files to be processed " + str(args.list[1]))
-				print("Types of args for files <class 'list'>")
+				print("Files to be processed: ['" + str(args.list[1]) + "']")
+				print("Type of args for files <class 'list'>")
 			login_rec = read_login_rec(args.file,args)
 			userhost_rec = get_login_rec(login_rec,args)
 			userhost_rec.sort()
@@ -380,8 +353,8 @@ if __name__ == '__main__':
 			if args.verbose is True:
 				placeholder = []
 				placeholder.append(str(sys.argv[5]))
-				print("Files to be processed " + str(placeholder))
-				print("Types of args for files " + str(type(placeholder)))
+				print("Files to be processed: " + str(placeholder))
+				print("Type of args for files " + str(type(placeholder)))
 			#Grab the bulk file, and parse it
 			args.file = [str(sys.argv[5])]
 			login_rec = read_login_rec(args.file,args)
@@ -409,10 +382,3 @@ if __name__ == '__main__':
 			if "monthly" in timeframe:
 				monthly_dict = cal_monthly_usage(login_rec,args)
 				print_statement(monthly_dict,"Month",subject)
-else:
-	parser.print_help()
-class parser(argparse.ArgumentParser):
-	def error(self, message):
-		sys.stderr.write('error: %s\n' % message)
-		parser.print_help()
-		sys.exit(2)		
