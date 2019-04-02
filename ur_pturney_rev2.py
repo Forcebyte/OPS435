@@ -17,12 +17,10 @@
 	I understand that the Academic Honesty Policy will be enforced and violators 
 	will be reported and appropriate action will be taken.
 '''
-
 import os 
 import sys
 import time
 from time import strftime
-
 def get_login_rec(login_recs,args):
 	'''
 	get_login_rec(login_recs,args) -> hosts/users
@@ -77,9 +75,8 @@ def read_login_rec(filelist,args):
 		print("processing usage report for the following: ")
 		print("reading login/logout record files " + str(filelist))
 	elif (args.verbose is True and args.list):
-		print("reading login/logout record files " + str(filelist))
 		print("processing usage report for the following: ")
-
+		print("reading login/logout record files " + str(filelist))
 	#Takes each record from filelist, adds it to a list
 	unfiltered = []
 	#Read the record
@@ -112,7 +109,9 @@ def read_login_rec(filelist,args):
 
 def betweendays(split):
 	'''
-	
+	betweendays(split) -> prvday_timediff,nxtday_timediff
+		takes an individual split of login records, and returns an array with the time difference between those
+		two days... e.g. betweendays(split) -> [time from 12:00 - previousday,time from nextday - 12:00]
 	'''
 	dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}	
 	#Get both the starting and ending date
@@ -135,7 +134,7 @@ def betweendays(split):
 
 def cal_daily_usage(login_recs, args):
 	'''
-	cal_daily_usage(login_recs) -> timedict
+	cal_daily_usage(login_recs,arg) -> timedict
 		takes the login record lines generated in read_login_rec, and calculates the daily usage of each user or host mentioned
 		finally, it returns a dictionary with each day, and the total time for that day
 		Note that this function depends on parse_time, as it calculates time's down to the second for outputting
@@ -153,7 +152,7 @@ def cal_daily_usage(login_recs, args):
 		enddate_obj = time.strptime(str((' '.join(split[9:14]))))
 
 		#Generate a date object to use in the dictionary we will check against and later add to
-		dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}	
+		dictmonth = {"Jan":"01", "Feb":"02","Mar":"03","Apr":"04","May":"05","Jun":"06","Jul":"07","Aug":"08","Sep":"09","Oct":"10","Nov":"11","Dec":"12"}	
 
 		startdate_dy = strftime("%d", startdate_obj)
 		enddate_dy = strftime("%d", enddate_obj)
@@ -197,8 +196,8 @@ def cal_daily_usage(login_recs, args):
 
 def cal_weekly_usage(login_recs,args):
 	'''
-	cal_weekly_usage(login_recs) -> timedict
-		takes the login record lines generated in read_logientryn_rec, and calculates the weekly usage of user or host mentioned
+	cal_weekly_usage(login_recs,args) -> timedict
+		takes the login record lines generated in read_login_rec, and calculates the weekly usage of user or host mentioned
 		finally, it returns a dictionary with each week, and the total time for that week
 		Note that this function depends on parse_time, as it calculates time's down to the second for outputting
 
@@ -227,7 +226,7 @@ def cal_weekly_usage(login_recs,args):
 			if startdate_wk != enddate_wk:
 				prvweek = str(split[13]) + " " + str(startdate_wk)
 				if prvweek in timedict:
-					newtime = int(timedict[prvweek]) + int(timedifferences[0]) - 2
+					newtime = int(timedict[prvweek]) + int(timedifferences[0]) - timeholders
 					timedict[prvweek] = newtime
 				else:
 					timedict[prvweek] = int(timedifferences[0])
@@ -247,18 +246,23 @@ def cal_weekly_usage(login_recs,args):
 	return(timedict)
 
 def cal_monthly_usage(login_recs, args):
+	'''
+	cal_weekly_usage(login_recs) -> timedict
+		takes the login record lines generated in read_login_rec, and calculates the monthly usage of user or host mentioned
+		finally, it returns a dictionary with each month, and the total time for that month
+		Note that this function depends on parse_time, as it calculates time's down to the second for outputting
+
+		e.g. cal_monthly_usage(login_recs,args) -> Dictionary of time totals
+	'''
 	timedict = {}
 	for item in login_recs:
 		#Split item into catagories
 		split = item.split()
-
 		#generate a month object that we will check against later
 		dictmonth = {"Jan":"1", "Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
-
 		#Convert both dates into time objects
 		startdate_obj = time.strptime(str((' '.join(split[3:8]))))
 		enddate_obj = time.strptime(str((' '.join(split[9:14]))))
-
 		#Grab a day number from each entry to compare
 		startdate_dy = strftime("%d", startdate_obj)
 		enddate_dy = strftime("%d", enddate_obj)
@@ -271,7 +275,7 @@ def cal_monthly_usage(login_recs, args):
 			if startdate_mn != enddate_mn:
 				prvmonth = str(split[7]) + " " + startdate_mn
 				if prvmonth in timedict:
-					newtime = int(timedict[prvmonth]) + int(timedifferences[0]) - 2
+					newtime = int(timedict[prvmonth]) + int(timedifferences[0]) - timeholders
 					timedict[prvweek] = newtime
 				else:
 					timedict[prvweek] = int(timedifferences[0])
@@ -292,6 +296,11 @@ def cal_monthly_usage(login_recs, args):
 	return(timedict)
 
 def print_statement(dictionary,usertype,subject):
+	'''
+	print_statement(dictionary,usertype,subject) -> N.A
+		Takes all information given, and prints out a statement corelating to the output requested by the user
+		e.g. print_statement(dictionary1,usertype1,user) -> prints output for user report
+	'''
 	line = str(usertype) + "ly Usage Report for " + str(subject)
 	eq = len(line)
 	print(line)
@@ -316,15 +325,13 @@ if __name__ == '__main__':
 	parser.add_argument("-F", "--file", help="list of files to be processed")
 	parser.add_argument("-l", "--list",  help="generate user name or remote host IP from the given files", nargs=2)
 	parser.add_argument("-r", "--rhost",  help="usage report for the given remote host IP")
-	parser.add_argument("-t", "--type",  help="type of report: daily, weekly, and monthly", nargs=2)
+	parser.add_argument("-t", "--type", help="type of report: daily, weekly, and monthly", nargs=2)
 	parser.add_argument("-u", "--user", help="usage report for the given user name")
 	parser.add_argument("-v", "--verbose", help="turn on output verbosity", action="store_true")
-	#[ code to retrieve command line argument using the argparse module 
 	args = parser.parse_args()
 
 	#Run if arguments exist
 	if args is not None:
-		#If we're running verbosely, run with arguments for each file
 		#If running with -l (E.g. ./ur.py -l user/host test.txt)
 		if args.list is not None:
 			#Since we are running with -l, the file that we are using is specified in the fourth argument
@@ -343,11 +350,10 @@ if __name__ == '__main__':
 			eq = len(line)
 			print(line)
 			print("=" * eq)
-
 			#Now that we are done, print the user or host involved by passing through each host/user in the list
 			for user_or_host in userhost_rec:
 				print(user_or_host)
-		
+
 		#If running with -r (E.g. ./ur.py -r 10.0.0.1 test.txt)
 		if args.rhost or args.user is not None:
 			if args.verbose is True:
@@ -361,11 +367,9 @@ if __name__ == '__main__':
 			
 			#In this case, the timeframe will be what the user wants
 			timeframe = str(sys.argv[4])
-
-
 			subject = str(sys.argv[2])
 
-			#If asking for a daily report (E.g. ./ur.py -r 10.0.0.1 daily test.txt)
+			#If asking for a daily repx`ort (E.g. ./ur.py -r 10.0.0.1 daily test.txt)
 			if "daily" in timeframe:
 				#Grab the ditionary for daily usage
 				daily_dict 	= cal_daily_usage(login_rec,args)
